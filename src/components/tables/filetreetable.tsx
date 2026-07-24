@@ -60,11 +60,11 @@ interface TableField {
 }
 
 const AllFields: readonly TableField[] = [
-    { name: "name", label: "名称", component: NameField, briefField: true },
-    { name: "size", label: "大小", component: ByteSizeField, briefField: true },
-    { name: "done", label: "已完成", component: ByteSizeField },
-    { name: "percent", label: "进度", component: PercentBarField },
-    { name: "priority", label: "优先级", component: PriorityField },
+    { name: "name", label: "Name", component: NameField, briefField: true },
+    { name: "size", label: "Size", component: ByteSizeField, briefField: true },
+    { name: "done", label: "Done", component: ByteSizeField },
+    { name: "percent", label: "Percent", component: PercentBarField },
+    { name: "priority", label: "Priority", component: PriorityField },
 ] as const;
 
 function NameField(props: TableFieldProps) {
@@ -88,7 +88,7 @@ function NameField(props: TableFieldProps) {
             { torrentId: fileTree.torrentId, path: props.entry.fullpath, name },
             {
                 onSettled: onEnd,
-                onError: () => { notifications.show({ color: "red", message: "更新文件路径失败" }); },
+                onError: () => { notifications.show({ color: "red", message: "Failed to update file path" }); },
                 onSuccess: () => {
                     fileTree.updatePath(props.entry.fullpath, name);
                     refreshFileTree(props.treeName);
@@ -169,7 +169,7 @@ function PriorityField(props: TableFieldProps) {
         variant="filled"
         bg={priority === undefined ? "gray" : PriorityColors.get(priority)}
     >
-        {priority === undefined ? "混合" : PriorityStrings.get(priority)}
+        {priority === undefined ? "mixed" : PriorityStrings.get(priority)}
     </Badge>;
 }
 
@@ -283,10 +283,10 @@ function SearchBox({ setSearchTerms }: {
             <TextInput
                 ref={searchRef}
                 leftSection={<Icon.Search size="1rem" />}
-                rightSection={<ActionIcon variant="subtle" onClick={onSearchClear} title="清除">
+                rightSection={<ActionIcon variant="subtle" onClick={onSearchClear} title="Clear">
                     <Icon.XLg size="1rem" color="var(--mantine-color-red-6)" />
                 </ActionIcon>}
-                placeholder="搜索文件"
+                placeholder="search files"
                 onInput={onSearchInput}
                 classNames={{
                     root: classes.searchRoot,
@@ -348,7 +348,7 @@ export function FileTreeTable(props: FileTreeTableProps) {
             path = pathMapFromServer(path, serverConfig);
             invoke("shell_open", { path, reveal }).catch(() => {
                 notifications.show({
-                    title: "打开路径失败",
+                    title: "Error opening path",
                     message: path,
                     color: "red",
                 });
@@ -488,7 +488,7 @@ function FiletreeContextMenu(props: {
             {
                 onSuccess: () => {
                     notifications.show({
-                        message: "优先级已更新",
+                        message: "Priority updated",
                         color: "green",
                     });
                 },
@@ -514,7 +514,7 @@ function FiletreeContextMenu(props: {
             {
                 onSuccess: () => {
                     notifications.show({
-                        message: "文件已更新",
+                        message: "Files updated",
                         color: "green",
                     });
                 },
@@ -537,14 +537,14 @@ function FiletreeContextMenu(props: {
                     leftSection={<Icon.BoxArrowUpRight size="1.1rem" />}
                     disabled={props.currentRow === ""}
                 >
-                    <Text fw="bold">打开</Text>
+                    <Text fw="bold">Open</Text>
                 </Menu.Item>
                 <Menu.Item
                     onClick={() => { onOpen(true); }}
                     leftSection={<Icon.Folder2Open size="1.1rem" />}
                     disabled={props.currentRow === ""}
                 >
-                    <Text>打开目录</Text>
+                    <Text>Open folder</Text>
                 </Menu.Item>
                 <Menu.Divider />
             </>}

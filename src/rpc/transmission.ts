@@ -32,13 +32,13 @@ export const Status = {
 } as const;
 
 export const StatusStrings = [
-    "已暂停",
+    "Stopped",
     "Waiting",
-    "校验中",
+    "Verifying",
     "Waiting",
-    "下载中",
+    "Downloading",
     "Waiting",
-    "做种中",
+    "Seeding",
 ] as const;
 
 export type PriorityNumberType = -1 | 0 | 1;

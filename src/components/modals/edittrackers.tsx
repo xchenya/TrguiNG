@@ -97,7 +97,7 @@ export function EditTrackers(props: ModalState) {
                 onError: (e) => {
                     console.error("Failed to update torrent properties", e);
                     notifications.show({
-                        message: "更新种子失败",
+                        message: "Error updating torrent",
                         color: "red",
                     });
                 },
@@ -121,7 +121,7 @@ export function EditTrackers(props: ModalState) {
                 onClose={props.close}
                 onSave={onSave}
                 centered
-                title="编辑种子 Tracker"
+                title="Edit torrent trackers"
                 mih="25rem"
             >
                 <LoadingOverlay visible={isLoading} />
@@ -130,10 +130,10 @@ export function EditTrackers(props: ModalState) {
                         <TorrentsNames />
                     </Grid.Col>
                     <Grid.Col span={8}>
-                        <Text>Tracker 列表，每行一个，层级之间空行</Text>
+                        <Text>Tracker list, one per line, empty line between tiers</Text>
                     </Grid.Col>
                     <Grid.Col span={4}>
-                        <Button onClick={addDefaultTrackers}>添加默认列表</Button>
+                        <Button onClick={addDefaultTrackers}>Add default list</Button>
                     </Grid.Col>
                     <Grid.Col>
                         <Textarea

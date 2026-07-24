@@ -39,11 +39,11 @@ interface TableField {
 
 const AllFields: readonly TableField[] = [
     { name: "announce", label: "Announce URL" },
-    { name: "announceState", label: "种子状态", columnId: "status", accessorFn: getTrackerAnnounceState },
-    { name: "nextAnnounceTime", label: "下次汇报", component: NextUpdateField },
-    { name: "seederCount", label: "做种数", component: NumberField },
-    { name: "leecherCount", label: "用户数", component: NumberField },
-    { name: "downloadCount", label: "下载数", component: NumberField },
+    { name: "announceState", label: "Status", columnId: "status", accessorFn: getTrackerAnnounceState },
+    { name: "nextAnnounceTime", label: "Next update", component: NextUpdateField },
+    { name: "seederCount", label: "Seeds", component: NumberField },
+    { name: "leecherCount", label: "Peers", component: NumberField },
+    { name: "downloadCount", label: "Downloads", component: NumberField },
 ] as const;
 
 const Columns = AllFields.map((field): ColumnDef<TrackerStats> => {

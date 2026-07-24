@@ -743,7 +743,7 @@ export function EditableNameField(props: EditableNameFieldProps) {
                 ? <ActionIcon
                     variant="subtle"
                     onClick={renameHandler}
-                    title="重命名 (F2)"
+                    title="Rename (F2)"
                     className={classes.actionIcon}
                 >
                     <Icon.InputCursorText size="1rem" />

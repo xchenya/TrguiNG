@@ -219,13 +219,13 @@ export function Server({ hostname, tabsRef, toolbarExtra, toggleTabStrip }: Serv
                         ? <Loader size="xl" />
                         : sessionIsError
                             ? <>
-                                <Title c="red" order={1}>加载会话失败</Title>
+                                <Title c="red" order={1}>Failed to load session</Title>
                                 <Title c="red" order={3}>{(sessionError as Error).message}</Title>
                             </>
                             : session?.["rpc-version"] === undefined
-                                ? <Title c="red" order={1}>服务器似乎不是 Transmission 守护进程</Title>
+                                ? <Title c="red" order={1}>Server does not appear to be transmission daemon</Title>
                                 : rpcVersion < 14
-                                    ? <Title c="red" order={1}>需要 Transmission 2.40 或更高版本。</Title>
+                                    ? <Title c="red" order={1}>Transmission version 2.40 or higher is required.</Title>
                                     : <></>}
                 </Flex>
             </Overlay>}

@@ -95,7 +95,7 @@ function useButtonHandlers(
                     onError: (e) => {
                         console.error("Error running torrent update method", method, e);
                         notifications.show({
-                            message: "更新种子失败",
+                            message: "Error updating torrent",
                             color: "red",
                         });
                     },
@@ -111,13 +111,13 @@ function useButtonHandlers(
                 {
                     onSuccess: () => {
                         notifications.show({
-                            message: "优先级已更新",
+                            message: "Priority is updated",
                             color: "green",
                         });
                     },
                     onError: (error) => {
                         notifications.show({
-                            title: "更新优先级失败",
+                            title: "Failed to update priority",
                             message: String(error),
                             color: "red",
                         });
@@ -190,7 +190,7 @@ function Toolbar(props: ToolbarProps) {
                 .filter((s) => s !== ""));
     }, [debouncedSetSearchTerms]);
 
-    const [searchPlaceholder, setSearchPlaceholder] = useState<string>(`搜索 (${modKeyString()} + f)`);
+    const [searchPlaceholder, setSearchPlaceholder] = useState<string>(`search (${modKeyString()} + f)`);
 
     const searchRef = useRef<HTMLInputElement>(null);
 
@@ -236,7 +236,7 @@ function Toolbar(props: ToolbarProps) {
                 msg = e.message;
             }
             notifications.show({
-                title: "导入设置失败",
+                title: "Error importing settings",
                 message: msg,
                 color: "red",
             });
@@ -264,19 +264,19 @@ function Toolbar(props: ToolbarProps) {
 
             <Button.Group mx="sm">
                 <ToolbarButton
-                    title="开始种子 (F3)"
+                    title="Start torrent (F3)"
                     onClick={handlers.start}
                 >
                     <Icon.PlayCircleFill size="1.5rem" color="var(--mantine-color-blue-6)" />
                 </ToolbarButton>
                 <ToolbarButton
-                    title="暂停种子 (F4)"
+                    title="Pause torrent (F4)"
                     onClick={handlers.pause}
                 >
                     <Icon.PauseCircleFill size="1.5rem" color="var(--mantine-color-blue-6)" />
                 </ToolbarButton>
                 <ToolbarButton
-                    title="删除种子 (del)"
+                    title="Remove torrent (del)"
                     onClick={handlers.remove}
                 >
                     <Icon.XCircleFill size="1.5rem" color="var(--mantine-color-red-6)" />
@@ -285,13 +285,13 @@ function Toolbar(props: ToolbarProps) {
 
             <Button.Group mx="sm">
                 <ToolbarButton
-                    title="队列上移"
+                    title="Move up in queue"
                     onClick={handlers.queueUp}
                 >
                     <Icon.ArrowUpCircleFill size="1.5rem" color="var(--mantine-color-green-8)" />
                 </ToolbarButton>
                 <ToolbarButton
-                    title="队列下移"
+                    title="Move down in queue"
                     onClick={handlers.queueDown}
                 >
                     <Icon.ArrowDownCircleFill size="1.5rem" color="var(--mantine-color-green-8)" />
@@ -300,13 +300,13 @@ function Toolbar(props: ToolbarProps) {
 
             <Button.Group mx="sm">
                 <ToolbarButton
-                    title="移动种子 (F6)"
+                    title="Move torrent (F6)"
                     onClick={handlers.move}
                 >
                     <Icon.FolderFill size="1.5rem" color="var(--mantine-color-yellow-4)" stroke="var(--mantine-color-yellow-5)" />
                 </ToolbarButton>
                 <ToolbarButton
-                    title="设置标签 (F7)"
+                    title="Set labels (F7)"
                     onClick={handlers.setLabels}
                 >
                     <Icon.TagsFill size="1.5rem" color="var(--mantine-color-blue-6)" />
@@ -320,7 +320,7 @@ function Toolbar(props: ToolbarProps) {
                     middlewares={{ shift: true, flip: false }}
                 >
                     <Menu.Target>
-                        <ToolbarButton title="设置优先级">
+                        <ToolbarButton title="Set priority">
                             <PriorityIcon
                                 width="1.5rem"
                                 height="1.5rem"
@@ -337,28 +337,28 @@ function Toolbar(props: ToolbarProps) {
                             onClick={handlers.setPriorityHigh}
                             rightSection={<Kbd>{`${modKeyString()} H`}</Kbd>}
                         >
-                            高
+                            High
                         </Menu.Item>
                         <Menu.Item
                             leftSection={<Icon.CircleFill color="var(--mantine-color-teal-9)" />}
                             onClick={handlers.setPriorityNormal}
                             rightSection={<Kbd>{`${modKeyString()} N`}</Kbd>}
                         >
-                            正常
+                            Normal
                         </Menu.Item>
                         <Menu.Item
                             leftSection={<Icon.CircleFill color="var(--mantine-color-yellow-6)" />}
                             onClick={handlers.setPriorityLow}
                             rightSection={<Kbd>{`${modKeyString()} L`}</Kbd>}
                         >
-                            低
+                            Low
                         </Menu.Item>
                     </Menu.Dropdown>
                 </Menu>
             </Button.Group>
 
             <ToolbarButton
-                title="切换备用带宽模式 (F8)"
+                title={`Turn alternative bandwidth mode ${altSpeedMode === true ? "off" : "on"} (F8)`}
                 onClick={handlers.toggleAltSpeedMode}
                 depressed={altSpeedMode}
             >
@@ -370,12 +370,12 @@ function Toolbar(props: ToolbarProps) {
                 mx="sm"
                 leftSection={<Icon.Search size="1rem" />}
                 placeholder={searchPlaceholder}
-                rightSection={<ActionIcon variant="subtle" onClick={onSearchClear} title="清除">
+                rightSection={<ActionIcon variant="subtle" onClick={onSearchClear} title="Clear">
                     <Icon.XLg size="1rem" color="var(--mantine-color-red-6)" />
                 </ActionIcon>}
                 onInput={onSearchInput}
-                onFocus={() => setSearchPlaceholder("按名称搜索，或使用 path:路径 / label:标签")}
-                onBlur={() => setSearchPlaceholder(`搜索 (${modKeyString()} + f)`)}
+                onFocus={() => setSearchPlaceholder("search by name or path:somepath or label:somelabel")}
+                onBlur={() => setSearchPlaceholder(`search (${modKeyString()} + f)`)}
                 styles={{ root: { flexGrow: 1 }, input: { height: "auto" } }}
                 autoComplete="off"
                 autoCorrect="off"
@@ -391,7 +391,7 @@ function Toolbar(props: ToolbarProps) {
                 middlewares={{ shift: true, flip: true }}
             >
                 <Menu.Target>
-                    <ToolbarButton title="布局">
+                    <ToolbarButton title="Layout">
                         <Icon.Grid1x2Fill size="1.5rem" style={{ transform: "rotate(-90deg)" }} />
                     </ToolbarButton>
                 </Menu.Target>
@@ -401,40 +401,40 @@ function Toolbar(props: ToolbarProps) {
                         onClick={props.toggleMainSplit}
                         rightSection={<Kbd>{`${modKeyString()} P`}</Kbd>}
                     >
-                        切换布局
+                        Change layout
                     </Menu.Item>
                     <Menu.Item
                         onClick={props.toggleFiltersPanel}
                         rightSection={<Kbd>{`${modKeyString()} Y`}</Kbd>}
                     >
-                        显示/隐藏过滤器
+                        Toggle filters
                     </Menu.Item>
                     <Menu.Item
                         onClick={props.toggleDetailsPanel}
                         rightSection={<Kbd>{`${modKeyString()} I`}</Kbd>}
                     >
-                        显示/隐藏详情
+                        Toggle details
                     </Menu.Item>
                     {props.extra !== undefined
                         && <Menu.Item
                             onClick={props.toggleTabStrip}
                             rightSection={<Kbd>{`${modKeyString()} [`}</Kbd>}
                         >
-                            显示/隐藏标签栏
+                            Toggle tab strip
                         </Menu.Item>}
                     <Menu.Divider />
-                    <Menu.Label>界面设置</Menu.Label>
+                    <Menu.Label>Interface settings</Menu.Label>
                     <Menu.Item onClick={onSettingsExport}>
-                        导出
+                        Export
                     </Menu.Item>
                     <Menu.Item onClick={() => { void onSettingsImport(); }}>
-                        导入
+                        Import
                     </Menu.Item>
                 </Menu.Dropdown>
             </Menu>
 
             <ToolbarButton
-                title="轮询间隔和服务器设置 (F9)"
+                title="Polling intervals and server settings (F9)"
                 onClick={handlers.daemonSettings}
             >
                 <Icon.Tools size="1.5rem" />

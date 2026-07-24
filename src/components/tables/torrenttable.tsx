@@ -79,16 +79,16 @@ const TimeField = memo(function TimeField(props: TableFieldProps) {
 const AllFields: readonly TableField[] = [
     {
         name: "name",
-        label: "名称",
+        label: "Name",
         component: NameField,
         requiredFields: ["name", "error", "trackerStats", "leftUntilDone"] as TorrentFieldsType[],
     },
-    { name: "totalSize", label: "大小", component: ByteSizeField },
+    { name: "totalSize", label: "Size", component: ByteSizeField },
     { name: "sizeWhenDone", label: "Size to download", component: ByteSizeField },
     { name: "leftUntilDone", label: "Size left", component: ByteSizeField },
-    { name: "haveValid", label: "进度", component: ByteSizeField },
-    { name: "downloadedEver", label: "已下载", component: ByteSizeField },
-    { name: "uploadedEver", label: "已上传", component: ByteSizeField },
+    { name: "haveValid", label: "Have", component: ByteSizeField },
+    { name: "downloadedEver", label: "Downloaded", component: ByteSizeField },
+    { name: "uploadedEver", label: "Uploaded", component: ByteSizeField },
     {
         name: "uploadedEver",
         label: "U/D",
@@ -99,35 +99,35 @@ const AllFields: readonly TableField[] = [
     },
     {
         name: "percentDone",
-        label: "已完成",
+        label: "Done",
         component: PercentBarField,
         requiredFields: ["percentDone", "rateDownload", "rateUpload"] as TorrentFieldsType[],
     },
-    { name: "rateDownload", label: "下载速度", component: ByteRateField },
-    { name: "rateUpload", label: "上传速度", component: ByteRateField },
+    { name: "rateDownload", label: "Down speed", component: ByteRateField },
+    { name: "rateUpload", label: "Up speed", component: ByteRateField },
     {
         name: "status",
-        label: "种子状态",
+        label: "Status",
         component: StatusField,
         requiredFields: ["status", "sequential_download"],
     },
     { name: "addedDate", label: "Added on", component: DateField },
     {
         name: "peersSendingToUs",
-        label: "做种数",
+        label: "Seeds",
         component: SeedsField,
         columnId: "peersSendingToUs",
         accessorFn: (t) => t.peersSendingToUs * 1e+6 + t.cachedSeedsTotal,
     },
     {
         name: "peersGettingFromUs",
-        label: "用户数",
+        label: "Peers",
         component: PeersField,
         columnId: "peersGettingFromUs",
         accessorFn: (t) => t.peersGettingFromUs * 1e+6 + t.cachedPeersTotal,
     },
     { name: "eta", label: "ETA", component: EtaField },
-    { name: "uploadRatio", label: "分享率", component: FixedDecimalField },
+    { name: "uploadRatio", label: "Ratio", component: FixedDecimalField },
     {
         name: "uploadRatio",
         label: "Ratio progress",
@@ -158,20 +158,20 @@ const AllFields: readonly TableField[] = [
     },
     {
         name: "errorString",
-        label: "错误",
+        label: "Error",
         component: ErrorField,
         columnId: "error",
         accessorFn: (t) => t.cachedError,
     },
-    { name: "doneDate", label: "完成于", component: DateField },
+    { name: "doneDate", label: "Completed on", component: DateField },
     { name: "activityDate", label: "Last active", component: DateDiffField },
     { name: "downloadDir", label: "Path", component: StringField },
-    { name: "bandwidthPriority", label: "优先级", component: PriorityField },
+    { name: "bandwidthPriority", label: "Priority", component: PriorityField },
     { name: "id", label: "ID", component: PositiveNumberField },
     { name: "queuePosition", label: "Queue position", component: PositiveNumberField },
     { name: "secondsSeeding", label: "Seeding time", component: TimeField },
     { name: "isPrivate", label: "Private", component: StringField },
-    { name: "labels", label: "用户标签", component: LabelsField },
+    { name: "labels", label: "Labels", component: LabelsField },
     { name: "group", label: "Bandwidth group", component: StringField },
     { name: "file-count", label: "File count", component: PositiveNumberField },
     { name: "pieceCount", label: "Piece count", component: PositiveNumberField },
@@ -209,7 +209,7 @@ function NameField(props: TableFieldProps) {
                 { torrentId: props.torrent.id, path, name },
                 {
                     onSettled: onEnd,
-                    onError: () => { notifications.show({ color: "red", message: "重命名种子失败" }); },
+                    onError: () => { notifications.show({ color: "red", message: "Failed to rename torrent" }); },
                 });
         }
     }, [mutation, props.torrent.id, props.torrent.name]);
@@ -344,9 +344,9 @@ export function LabelsField(props: TableFieldProps) {
 
 export function StatusField(props: TableFieldProps) {
     let status: string = StatusStrings[props.torrent.status];
-    if (props.torrent.status === Status.downloading && props.torrent.pieceCount === 0) status = "磁力链接";
+    if (props.torrent.status === Status.downloading && props.torrent.pieceCount === 0) status = "Magnetizing";
 
-    const sequential = (props.torrent.status === Status.downloading && props.torrent.sequential_download === true) ? " 顺序下载" : "";
+    const sequential = (props.torrent.status === Status.downloading && props.torrent.sequential_download === true) ? " sequentially" : "";
     return <div>{status + sequential}</div>;
 }
 
@@ -366,7 +366,7 @@ export function DateDiffField(props: TableFieldProps) {
     const seconds = Math.floor(Date.now() / 1000) - props.torrent[props.fieldName];
     return <div title={date} style={{ width: "100%", textAlign: "right" }}>
         {seconds < 30
-            ? "现在"
+            ? "now"
             : date === "" ? "" : `${secondsToHumanReadableStr(seconds)} ago`}
     </div>;
 }
@@ -482,7 +482,7 @@ export function TorrentTable(props: {
             path = pathMapFromServer(path, serverConfig);
             invoke("shell_open", { path, reveal }).catch(() => {
                 notifications.show({
-                    title: "打开路径失败",
+                    title: "Error opening path",
                     message: path,
                     color: "red",
                 });
@@ -593,26 +593,26 @@ function TorrentContextMenu(props: {
                         leftSection={<Icon.BoxArrowUpRight size="1.1rem" />}
                         disabled={serverData.current === undefined}
                     >
-                        <Text fw="bold">打开</Text>
+                        <Text fw="bold">Open</Text>
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => { onOpen(true); }}
                         leftSection={<Icon.Folder2Open size="1.1rem" />}
                         disabled={serverData.current === undefined}
                     >
-                        <Text>打开目录</Text>
+                        <Text>Open folder</Text>
                     </Menu.Item>
                     <Menu.Divider />
                 </>}
                 <Menu.Item
-                    onClick={() => { torrentAction("torrent-start-now", "种子已开始"); }}
+                    onClick={() => { torrentAction("torrent-start-now", "Torrents started"); }}
                     leftSection={<Icon.LightningFill size="1.1rem" />}
                     disabled={serverSelected.size === 0}
                 >
                     Force start
                 </Menu.Item>
                 <Menu.Item
-                    onClick={() => { torrentAction("torrent-start", "种子已开始"); }}
+                    onClick={() => { torrentAction("torrent-start", "Torrents started"); }}
                     leftSection={<Icon.PlayCircleFill size="1.1rem" />}
                     rightSection={<Kbd>F3</Kbd>}
                     disabled={serverSelected.size === 0}
@@ -635,7 +635,7 @@ function TorrentContextMenu(props: {
                     Verify
                 </Menu.Item>
                 <Menu.Item
-                    onClick={() => { torrentAction("torrent-reannounce", "种子已重新汇报"); }}
+                    onClick={() => { torrentAction("torrent-reannounce", "Torrents are reannounced"); }}
                     leftSection={<Icon.Wifi size="1.1rem" />}
                     disabled={serverSelected.size === 0}
                 >
