@@ -68,10 +68,10 @@ function getTorrentError(t: TorrentBase): string {
 }
 
 export function getTrackerAnnounceState(tracker: TrackerStats) {
-    if (tracker.announceState === 3) return "Updating";
+    if (tracker.announceState === 3) return "更新中";
     if (tracker.hasAnnounced as boolean) {
-        if (tracker.lastAnnounceSucceeded as boolean) return "Working";
-        if (tracker.lastAnnounceResult === "Success") return "Working";
+        if (tracker.lastAnnounceSucceeded as boolean) return "工作中";
+        if (tracker.lastAnnounceResult === "Success") return "工作中";
         return tracker.lastAnnounceResult;
     }
     return "";
@@ -179,13 +179,13 @@ export interface PeerStats extends PeerStatsBase {
 // Flag meanings: https://github.com/transmission/transmission/blob/main/docs/Peer-Status-Text.md
 
 const statusFlagStrings = {
-    O: "optimistic",
-    D: "downloading",
-    d: "can download from",
-    U: "uploading",
-    u: "can upload to",
-    K: "not interested",
-    "?": "peer not interested",
+    O: "乐观解锁",
+    D: "正在下载",
+    d: "可从其下载",
+    U: "正在上传",
+    u: "可向其上传",
+    K: "不感兴趣",
+    "?": "对方不感兴趣",
 } as const;
 
 async function processPeerStats(peer: PeerStatsBase, lookupIps: boolean, client: TransmissionClient): Promise<PeerStats> {
@@ -206,9 +206,9 @@ async function processPeerStats(peer: PeerStatsBase, lookupIps: boolean, client:
 
     return {
         ...peer,
-        cachedEncrypted: flags.includes("E") ? "yes" : "no",
+        cachedEncrypted: flags.includes("E") ? "是" : "否",
         cachedFrom,
-        cachedConnection: flags.includes("I") ? "incoming" : "outgoing",
+        cachedConnection: flags.includes("I") ? "传入" : "传出",
         cachedProtocol: flags.includes("T") ? "µTP" : "TCP",
         cachedStatus: (status ?? []).join(", "),
         cachedCountryIso: country?.isoCode,

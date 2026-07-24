@@ -41,21 +41,21 @@ interface TableField {
 }
 
 const AllFields: TableField[] = [
-    { name: "address", label: "Address" },
-    { name: "port", label: "Port" },
-    { name: "clientName", label: "Client" },
-    { name: "flagStr", label: "Flags" },
-    { name: "progress", label: "Have", component: PercentField },
-    { name: "rateToPeer", label: "Up speed", component: ByteRateField },
-    { name: "rateToClient", label: "Down speed", component: ByteRateField },
-    { name: "cachedEncrypted", label: "Encrypted" },
-    { name: "cachedFrom", label: "From" },
-    { name: "cachedConnection", label: "Connection" },
-    { name: "cachedProtocol", label: "Protocol" },
-    { name: "cachedStatus", label: "Status" },
+    { name: "address", label: "地址" },
+    { name: "port", label: "端口" },
+    { name: "clientName", label: "客户端" },
+    { name: "flagStr", label: "标志" },
+    { name: "progress", label: "进度", component: PercentField },
+    { name: "rateToPeer", label: "上传速度", component: ByteRateField },
+    { name: "rateToClient", label: "下载速度", component: ByteRateField },
+    { name: "cachedEncrypted", label: "加密" },
+    { name: "cachedFrom", label: "来源" },
+    { name: "cachedConnection", label: "连接状态" },
+    { name: "cachedProtocol", label: "协议" },
+    { name: "cachedStatus", label: "种子状态" },
 ];
 
-if (TAURI) AllFields.splice(1, 0, { name: "cachedCountryName", label: "Country", columnId: "country", component: CountryField });
+if (TAURI) AllFields.splice(1, 0, { name: "cachedCountryName", label: "国家", columnId: "country", component: CountryField });
 
 function CountryField(props: TableFieldProps) {
     const iso = props.entry.cachedCountryIso;

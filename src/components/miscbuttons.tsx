@@ -59,7 +59,7 @@ export function ShowVersion(props: { sz?: string, btn?: MantineSize }) {
                 variant="subtle"
                 size={props.btn}
                 onClick={openVersionModal}
-                title="Show version information"
+                title="显示版本信息"
                 ml="auto"
                 my="auto"
             >

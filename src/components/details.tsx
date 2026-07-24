@@ -51,9 +51,9 @@ function DownloadBar(props: { torrent: Torrent }) {
         prefix = "Downloading metadata";
         percent = props.torrent.metadataPercentComplete;
     } else if (props.torrent.status === Status.stopped) {
-        prefix = "Stopped";
+        prefix = "已暂停";
     } else {
-        prefix = "Downloaded";
+        prefix = "已下载";
     }
 
     const config = useContext(ConfigContext);
@@ -154,7 +154,7 @@ function TransferTable(props: { torrent: Torrent }) {
                 className={classes.grid}
                 columns={rect.width > 850 ? 3 : 1}
             >
-                <DetailItem name="Status:"><StatusField {...props} fieldName="status" /></DetailItem>
+                <DetailItem name="状态："><StatusField {...props} fieldName="status" /></DetailItem>
                 <DetailItem name="Error:">{props.torrent.cachedError}</DetailItem>
                 <DetailItem name="Remaining:">{`${secondsToHumanReadableStr(props.torrent.eta)} (${bytesToHumanReadableStr(props.torrent.leftUntilDone)})`}</DetailItem>
                 <DetailItem name="Downloaded:">{bytesToHumanReadableStr(props.torrent.downloadedEver)}</DetailItem>
@@ -271,8 +271,8 @@ function TorrentDetails(props: { torrent: Torrent }) {
                     />
                 </DetailItem>
                 <DetailItem name="Comment:"><Urlize text={props.torrent.comment} /></DetailItem>
-                <DetailItem name="Added on:"><DateField {...props} fieldName="addedDate" /></DetailItem>
-                <DetailItem name="Completed on:"><DateField {...props} fieldName="doneDate" /></DetailItem>
+                <DetailItem name="添加于："><DateField {...props} fieldName="addedDate" /></DetailItem>
+                <DetailItem name="完成于："><DateField {...props} fieldName="doneDate" /></DetailItem>
                 <DetailItem name="Magnet link:">
                     <TextInput
                         classNames={readonlyInputStyles}
@@ -306,9 +306,9 @@ function GeneralPane(props: { torrent: Torrent }) {
             <div style={{ flexGrow: 1 }}>
                 <div className="scrollable">
                     <Container fluid>
-                        <TableNameRow>Transfer</TableNameRow>
+                        <TableNameRow>传输</TableNameRow>
                         <TransferTable {...props} />
-                        <TableNameRow>Torrent</TableNameRow>
+                        <TableNameRow>种子</TableNameRow>
                         <TorrentDetails {...props} />
                     </Container>
                 </div>
@@ -356,15 +356,15 @@ function Stats(props: { stats: SessionStatEntry }) {
     return <Table mb="sm" className={classes.statsTable}>
         <tbody>
             <tr>
-                <td style={{ width: "10em" }}>Downloaded</td>
+                <td style={{ width: "10em" }}>已下载</td>
                 <td>{bytesToHumanReadableStr(props.stats.downloadedBytes)}</td>
             </tr>
             <tr>
-                <td>Uploaded</td>
+                <td>已上传</td>
                 <td>{bytesToHumanReadableStr(props.stats.uploadedBytes)}</td>
             </tr>
             <tr>
-                <td>Ratio</td>
+                <td>分享率</td>
                 <td>
                     {props.stats.downloadedBytes === 0
                         ? "∞"
@@ -372,16 +372,16 @@ function Stats(props: { stats: SessionStatEntry }) {
                 </td>
             </tr>
             <tr>
-                <td>Files added</td>
+                <td>添加的文件</td>
                 <td>{props.stats.filesAdded}</td>
             </tr>
             <tr>
-                <td>Active</td>
+                <td>活动时间</td>
                 <td>{secondsToHumanReadableStr(props.stats.secondsActive)}</td>
             </tr>
             {props.stats.sessionCount > 1
                 && <tr>
-                    <td>Sesssion count</td>
+                    <td>会话次数</td>
                     <td>{props.stats.sessionCount}</td>
                 </tr>}
         </tbody>
@@ -397,9 +397,9 @@ function ServerStats() {
                 <div className="scrollable">
                     {sessionStats !== undefined
                         ? <Container fluid>
-                            <TableNameRow>Session</TableNameRow>
+                            <TableNameRow>会话</TableNameRow>
                             <Stats stats={sessionStats["current-stats"]} />
-                            <TableNameRow>Cumulative</TableNameRow>
+                            <TableNameRow>累计</TableNameRow>
                             <Stats stats={sessionStats["cumulative-stats"]} />
                         </Container>
                         : <></>}
@@ -411,32 +411,32 @@ function ServerStats() {
 
 const DetailsPanels = React.memo(function DetailsPanels({ torrent }: { torrent: Torrent | undefined }) {
     return (<>
-        <Tabs.Panel value="General" h="100%">
+        <Tabs.Panel value="常规" h="100%">
             {torrent !== undefined
                 ? <GeneralPane torrent={torrent} />
                 : <></>}
         </Tabs.Panel>
-        <Tabs.Panel value="Files" h="100%">
+        <Tabs.Panel value="文件" h="100%">
             {torrent !== undefined
                 ? <FileTreePane torrent={torrent} />
                 : <></>}
         </Tabs.Panel>
-        <Tabs.Panel value="Pieces" h="100%">
+        <Tabs.Panel value="块" h="100%">
             {torrent !== undefined
                 ? <PiecesCanvas torrent={torrent} />
                 : <></>}
         </Tabs.Panel>
-        <Tabs.Panel value="Peers" h="100%">
+        <Tabs.Panel value="用户数" h="100%">
             {torrent !== undefined
                 ? <PeersTable torrent={torrent} />
                 : <></>}
         </Tabs.Panel>
-        <Tabs.Panel value="Trackers" h="100%">
+        <Tabs.Panel value="Tracker" h="100%">
             {torrent !== undefined
                 ? <TrackersTable torrent={torrent} />
                 : <></>}
         </Tabs.Panel>
-        <Tabs.Panel value="Server statistics" h="100%">
+        <Tabs.Panel value="服务器统计" h="100%">
             <ServerStats />
         </Tabs.Panel>
     </>);
@@ -491,36 +491,36 @@ function Details(props: DetailsProps) {
                     contextMenuInfo={info}
                     setContextMenuInfo={setInfo}
                 />
-                {tabs[tabsMap.General].visible
-                    && <Tabs.Tab value="General" disabled={torrent === undefined} style={{ order: tabsMap.General }}>
+                {tabs[tabsMap["常规"]].visible
+                    && <Tabs.Tab value="常规" disabled={torrent === undefined} style={{ order: tabsMap["常规"] }}>
                         <Group>
                             <Icon.InfoCircle size="1.1rem" />
                             General
                         </Group>
                     </Tabs.Tab>}
-                {tabs[tabsMap.Files].visible
-                    && <Tabs.Tab value="Files" disabled={torrent === undefined} style={{ order: tabsMap.Files }}>
+                {tabs[tabsMap["文件"]].visible
+                    && <Tabs.Tab value="文件" disabled={torrent === undefined} style={{ order: tabsMap["文件"] }}>
                         <Group>
                             <Icon.Files size="1.1rem" />
                             {`Files${torrent !== undefined ? ` (${torrent.files.length as number})` : ""}`}
                         </Group>
                     </Tabs.Tab>}
-                {tabs[tabsMap.Pieces].visible
-                    && <Tabs.Tab value="Pieces" disabled={torrent === undefined} style={{ order: tabsMap.Pieces }}>
+                {tabs[tabsMap["块"]].visible
+                    && <Tabs.Tab value="块" disabled={torrent === undefined} style={{ order: tabsMap["块"] }}>
                         <Group>
                             <Icon.Grid3x2 size="1.1rem" />
                             {`Pieces${torrent !== undefined ? ` (${torrent.pieceCount as number})` : ""}`}
                         </Group>
                     </Tabs.Tab>}
-                {tabs[tabsMap.Peers].visible
-                    && <Tabs.Tab value="Peers" disabled={torrent === undefined} style={{ order: tabsMap.Peers }}>
+                {tabs[tabsMap["用户数"]].visible
+                    && <Tabs.Tab value="用户数" disabled={torrent === undefined} style={{ order: tabsMap["用户数"] }}>
                         <Group>
                             <Icon.People size="1.1rem" />
                             Peers
                         </Group>
                     </Tabs.Tab>}
-                {tabs[tabsMap.Trackers].visible
-                    && <Tabs.Tab value="Trackers" disabled={torrent === undefined} style={{ order: tabsMap.Trackers }}>
+                {tabs[tabsMap["Tracker"]].visible
+                    && <Tabs.Tab value="Tracker" disabled={torrent === undefined} style={{ order: tabsMap["Tracker"] }}>
                         <Group>
                             <Icon.Wifi size="1.1rem" />
                             Trackers
@@ -528,8 +528,8 @@ function Details(props: DetailsProps) {
                     </Tabs.Tab>}
                 {tabs[tabsMap["<spacer>"]].visible
                     && <Box style={{ flexGrow: 1, order: tabsMap["<spacer>"] }} />}
-                {tabs[tabsMap["Server statistics"]].visible
-                    && <Tabs.Tab value="Server statistics" style={{ order: tabsMap["Server statistics"] }}>
+                {tabs[tabsMap["服务器统计"]].visible
+                    && <Tabs.Tab value="服务器统计" style={{ order: tabsMap["服务器统计"] }}>
                         <Group>
                             <Icon.ArrowDownUp size="1.1rem" />
                             Server statistics

@@ -147,14 +147,14 @@ function ServerPanel(props: ServerPanelProps) {
     return (
         <div style={{ flexGrow: 1 }}>
             <TextInput
-                label="Name"
+                label="名称"
                 {...props.form.getInputProps(`servers.${props.current}.name`)}
                 autoCorrect="off"
                 autoCapitalize="off"
             />
 
             <TextInput
-                label="Server rpc url"
+                label="服务器 RPC 地址"
                 {...props.form.getInputProps(`servers.${props.current}.connection.url`)}
                 placeholder="http://1.2.3.4:9091/transmission/rpc"
                 autoComplete="off"
@@ -165,14 +165,14 @@ function ServerPanel(props: ServerPanelProps) {
 
             <Checkbox
                 my="md"
-                label="Accept invalid SSL certificates"
+                label="接受无效 SSL 证书"
                 {...props.form.getInputProps(`servers.${props.current}.connection.acceptInvalidCerts`, { type: "checkbox" })}
             />
 
             <Grid>
                 <Grid.Col span={6}>
                     <TextInput
-                        label="User name"
+                        label="用户名"
                         {...props.form.getInputProps(`servers.${props.current}.connection.username`)}
                         autoComplete="off"
                         autoCorrect="off"
@@ -182,7 +182,7 @@ function ServerPanel(props: ServerPanelProps) {
                 </Grid.Col>
                 <Grid.Col span={6}>
                     <PasswordInput
-                        label="Password"
+                        label="密码"
                         {...props.form.getInputProps(`servers.${props.current}.connection.password`)}
                     />
                 </Grid.Col>
@@ -244,7 +244,7 @@ function IntegrationsPanel({ form }: { form: UseFormReturnType<FormValues> }) {
 
     return (
         <Grid align="center" gutter="md">
-            <Grid.Col span={6}>Delete successfully added torrent files</Grid.Col>
+            <Grid.Col span={6}>删除成功添加的 torrent 文件</Grid.Col>
             <Grid.Col span={2}>
                 <Switch
                     onLabel="ON"
@@ -255,7 +255,7 @@ function IntegrationsPanel({ form }: { form: UseFormReturnType<FormValues> }) {
                 />
             </Grid.Col>
             <Grid.Col span={4}></Grid.Col>
-            <Grid.Col span={6}>Show notifications for completed torrents</Grid.Col>
+            <Grid.Col span={6}>显示完成通知</Grid.Col>
             <Grid.Col span={2}>
                 <Switch
                     onLabel="ON"
@@ -265,7 +265,7 @@ function IntegrationsPanel({ form }: { form: UseFormReturnType<FormValues> }) {
                     {...form.getInputProps("app.toastNotifications", { type: "checkbox" })}
                 />
             </Grid.Col>
-            <Grid.Col span={2}>Play sound</Grid.Col>
+            <Grid.Col span={2}>播放提示音</Grid.Col>
             <Grid.Col span={2}>
                 <Switch
                     onLabel="ON"
@@ -276,7 +276,7 @@ function IntegrationsPanel({ form }: { form: UseFormReturnType<FormValues> }) {
                 />
             </Grid.Col>
             {platform === "Windows" && <>
-                <Grid.Col span={6}>Launch on startup</Grid.Col>
+                <Grid.Col span={6}>开机启动</Grid.Col>
                 <Grid.Col span={2}>
                     <Switch
                         onLabel="ON"
@@ -288,11 +288,11 @@ function IntegrationsPanel({ form }: { form: UseFormReturnType<FormValues> }) {
                     />
                 </Grid.Col>
                 <Grid.Col span={4}></Grid.Col>
-                <Grid.Col span={6}>Associate application</Grid.Col>
+                <Grid.Col span={6}>关联应用程序</Grid.Col>
                 <Grid.Col span={3}><Button onClick={associateTorrent}>.torrent files</Button></Grid.Col>
-                <Grid.Col span={3}><Button onClick={associateMagnet}>magnet links</Button></Grid.Col>
+                <Grid.Col span={3}><Button onClick={associateMagnet}>个磁力链接</Button></Grid.Col>
             </>}
-            <Grid.Col span={6}>Show tray icon</Grid.Col>
+            <Grid.Col span={6}>显示托盘图标</Grid.Col>
             <Grid.Col span={2}>
                 <Switch
                     onLabel="ON"
@@ -310,7 +310,7 @@ function IntegrationsPanel({ form }: { form: UseFormReturnType<FormValues> }) {
                 />
             </Grid.Col>
             <Grid.Col span={4}>(takes effect after restart)</Grid.Col>
-            <Grid.Col span={6}>When minimized</Grid.Col>
+            <Grid.Col span={6}>最小化时</Grid.Col>
             <Grid.Col span={6}>
                 <SegmentedControl
                     data={WindowMinimizeOptions as unknown as string[]}
@@ -318,7 +318,7 @@ function IntegrationsPanel({ form }: { form: UseFormReturnType<FormValues> }) {
                     {...form.getInputProps("app.onMinimize")}
                 />
             </Grid.Col>
-            <Grid.Col span={6}>When closed</Grid.Col>
+            <Grid.Col span={6}>关闭时</Grid.Col>
             <Grid.Col span={6}>
                 <SegmentedControl
                     data={WindowCloseOptions as unknown as string[]}
@@ -411,14 +411,14 @@ export function AppSettingsModal(props: AppSettingsModalProps) {
             onClose={props.close}
             onSave={onSave}
             centered
-            title="Application Settings"
+            title="应用设置"
         >
             <form>
                 <Tabs mih="33rem" defaultValue="servers">
                     <Tabs.List>
-                        <Tabs.Tab value="servers" p="lg">Servers</Tabs.Tab>
-                        <Tabs.Tab value="integrations" p="lg">Integrations</Tabs.Tab>
-                        {TAURI && <Tabs.Tab value="interface" p="lg">Interface</Tabs.Tab>}
+                        <Tabs.Tab value="servers" p="lg">下载器列表</Tabs.Tab>
+                        <Tabs.Tab value="integrations" p="lg">程序设置</Tabs.Tab>
+                        {TAURI && <Tabs.Tab value="interface" p="lg">界面设置</Tabs.Tab>}
                     </Tabs.List>
 
                     <Tabs.Panel value="servers" pt="md">

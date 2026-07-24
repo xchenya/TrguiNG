@@ -159,7 +159,7 @@ export default function TauriApp() {
                         size="lg"
                         variant="default"
                         my="auto"
-                        title="Configure servers"
+                        title="应用设置"
                         onClick={serverConfigHandlers.open}
                     >
                         <Icon.GearFill size="1.1rem" />
@@ -176,7 +176,7 @@ export default function TauriApp() {
                                     <ToolbarButton title={`Create torrent (${modKeyString()} + T)`} onClick={onCreateTorrent}>
                                         <Icon.Stars size="1.5rem" />
                                     </ToolbarButton>
-                                    <ToolbarButton title="Configure servers" onClick={serverConfigHandlers.open}>
+                                    <ToolbarButton title="应用设置" onClick={serverConfigHandlers.open}>
                                         <Icon.GearFill size="1.5rem" />
                                     </ToolbarButton>
                                     {tabsRef.current?.getOpenTabs() !== undefined && tabsRef.current?.getOpenTabs()?.length > 1
@@ -188,7 +188,7 @@ export default function TauriApp() {
                                             middlewares={{ shift: true, flip: true }}
                                         >
                                             <Menu.Target>
-                                                <ToolbarButton title="Switch server">
+                                                <ToolbarButton title="切换服务器">
                                                     <Icon.Diagram2 size="1.5rem" />
                                                 </ToolbarButton>
                                             </Menu.Target>

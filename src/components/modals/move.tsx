@@ -46,9 +46,9 @@ export function MoveModal(props: ModalState) {
                     addPath(location.path);
                 },
                 onError: (e) => {
-                    console.error("Error moving torrents", e);
+                    console.error("移动种子失败", e);
                     notifications.show({
-                        message: "Error moving torrents",
+                        message: "移动种子失败",
                         color: "red",
                     });
                 },
@@ -73,24 +73,24 @@ export function MoveModal(props: ModalState) {
             && <HkModal
                 opened={props.opened}
                 onClose={props.close}
-                title="Move torrents"
+                title="移动种子"
                 centered
                 size="lg"
             >
                 <Divider my="sm" />
-                <Text mb="md">Enter new location for</Text>
+                <Text mb="md">输入新位置</Text>
                 <TorrentsNames />
                 <TorrentLocation {...location} focusPath />
                 <Checkbox
-                    label="Move torrent data to new location"
+                    label="将种子数据移动到新位置"
                     checked={moveData}
                     onChange={(e) => { setMoveData(e.currentTarget.checked); }}
                     my="xl"
                 />
                 <Divider my="sm" />
                 <Group justify="center" gap="md">
-                    <Button onClick={onMove} variant="filled">Move</Button>
-                    <Button onClick={props.close} variant="light">Cancel</Button>
+                    <Button onClick={onMove} variant="filled">移动</Button>
+                    <Button onClick={props.close} variant="light">取消</Button>
                 </Group>
             </HkModal>}
     </>;

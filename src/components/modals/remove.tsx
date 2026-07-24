@@ -32,8 +32,8 @@ export function RemoveModal(props: ModalState) {
 
     useEffect(() => {
         if (props.opened) {
-            if (config.values.interface.deleteTorrentData !== "remember selection") {
-                setDeleteData(config.values.interface.deleteTorrentData === "default on");
+            if (config.values.interface.deleteTorrentData !== "记住选择") {
+                setDeleteData(config.values.interface.deleteTorrentData === "默认开");
             } else {
                 setDeleteData(config.values.interface.deleteTorrentDataSelection);
             }
@@ -56,9 +56,9 @@ export function RemoveModal(props: ModalState) {
             },
             {
                 onError: (e) => {
-                    console.error("Error removing torrents", e);
+                    console.error("删除种子失败", e);
                     notifications.show({
-                        message: "Error removing torrents",
+                        message: "删除种子失败",
                         color: "red",
                     });
                 },
@@ -71,15 +71,15 @@ export function RemoveModal(props: ModalState) {
         <HkModal
             opened={props.opened}
             onClose={props.close}
-            title="Remove torrents"
+            title="删除种子"
             centered
             size="lg"
         >
             <Divider my="sm" />
-            <Text mb="md">Are you sure you want to remove following torrents?</Text>
+            <Text mb="md">确定要删除以下种子吗？</Text>
             <TorrentsNames />
             <Checkbox
-                label="Delete torrent data"
+                label="删除数据文件"
                 checked={deleteData}
                 onChange={onDeleteDataChanged}
                 my="xl"
@@ -92,9 +92,9 @@ export function RemoveModal(props: ModalState) {
                     color="red"
                     data-autofocus
                 >
-                    {deleteData ? "Delete" : "Remove"}
+                    {deleteData ? "Delete" : "删除"}
                 </Button>
-                <Button onClick={props.close} variant="light">Cancel</Button>
+                <Button onClick={props.close} variant="light">取消</Button>
             </Group>
         </HkModal>
     );

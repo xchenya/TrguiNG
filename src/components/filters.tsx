@@ -46,18 +46,18 @@ interface StatusFilter extends NamedFilter {
 
 const statusFilters: StatusFilter[] = [
     {
-        name: "All Torrents",
+        name: "全部",
         filter: () => true,
         icon: StatusIcons.All,
         required: true,
     },
     {
-        name: "Downloading",
+        name: "下载中",
         filter: (t: Torrent) => t.status === Status.downloading,
         icon: StatusIcons.Downloading,
     },
     {
-        name: "Completed",
+        name: "已完成",
         filter: (t: Torrent) => {
             return t.status === Status.seeding
                 || (t.sizeWhenDone > 0 && Math.max(t.sizeWhenDone - t.haveValid, 0) === 0);
@@ -65,36 +65,36 @@ const statusFilters: StatusFilter[] = [
         icon: StatusIcons.Completed,
     },
     {
-        name: "Active",
+        name: "活动中",
         filter: (t: Torrent) => {
             return t.rateDownload > 0 || t.rateUpload > 0;
         },
         icon: StatusIcons.Active,
     },
     {
-        name: "Inactive",
+        name: "未活动",
         filter: (t: Torrent) => {
             return t.rateDownload === 0 && t.rateUpload === 0 && t.status !== Status.stopped;
         },
         icon: StatusIcons.Inactive,
     },
     {
-        name: "Running",
+        name: "工作中",
         filter: (t: Torrent) => t.status !== Status.stopped,
         icon: StatusIcons.Running,
     },
     {
-        name: "Stopped",
+        name: "已暂停",
         filter: (t: Torrent) => t.status === Status.stopped,
         icon: StatusIcons.Stopped,
     },
     {
-        name: "Error",
+        name: "错误",
         filter: (t: Torrent) => (t.error !== 0 || t.cachedError !== ""),
         icon: StatusIcons.Error,
     },
     {
-        name: "Waiting",
+        name: "等待中",
         filter: (t: Torrent) => [
             Status.verifying,
             Status.queuedToVerify,
@@ -102,7 +102,7 @@ const statusFilters: StatusFilter[] = [
         icon: StatusIcons.Waiting,
     },
     {
-        name: "Magnetizing",
+        name: "磁力链接",
         filter: (t: Torrent) => t.status === Status.downloading && t.pieceCount === 0,
         icon: StatusIcons.Magnetizing,
     },
@@ -550,7 +550,7 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                             rightSection={<Icon.ChevronRight size="12" style={{ marginRight: "-0.4rem" }} />}
                             onMouseDown={(e) => { e.stopPropagation(); }}
                         >
-                            Status filters
+                            状态过滤器s
                         </Menu.Sub.Item>
                     </Menu.Sub.Target>
 
@@ -584,11 +584,11 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                     leftSection={showSizes ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
                     onClick={onShowSizesClick}
                 >
-                    Show sizes
+                    显示大小
                 </Menu.Item>
             </MemoSectionsContextMenu>
-            {sections[sectionsMap.Status].visible && <div style={{ order: sectionsMap.Status }}>
-                <Divider mx="sm" label="Status" labelPosition="center" />
+            {sections[sectionsMap["种子状态"]].visible && <div style={{ order: sectionsMap["种子状态"] }}>
+                <Divider mx="sm" label="种子状态" labelPosition="center" />
                 {statusFilters.map((f) =>
                     (f.required === true || statusFiltersVisibility[f.name])
                     && <FilterRow
@@ -601,11 +601,11 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                         showSizes={showSizes}
                     />)}
             </div>}
-            {sections[sectionsMap.Directories].visible && <div style={{ order: sectionsMap.Directories }}>
+            {sections[sectionsMap["数据目录"]].visible && <div style={{ order: sectionsMap["数据目录"] }}>
                 <Divider
                     mx="sm"
                     mt="md"
-                    label="Directories"
+                    label="数据目录"
                     labelPosition="center"
                 />
                 {dirs.map((d) =>
@@ -618,11 +618,11 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                         showSizes={showSizes}
                     />)}
             </div>}
-            {sections[sectionsMap.Labels].visible && <div style={{ order: sectionsMap.Labels }}>
+            {sections[sectionsMap["用户标签"]].visible && <div style={{ order: sectionsMap["用户标签"] }}>
                 <Divider
                     mx="sm"
                     mt="md"
-                    label="Labels"
+                    label="用户标签"
                     labelPosition="center"
                 />
                 <FilterRow
@@ -643,11 +643,11 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                         showSizes={showSizes}
                     />)}
             </div>}
-            {sections[sectionsMap.Trackers].visible && <div style={{ order: sectionsMap.Trackers }}>
+            {sections[sectionsMap["Tracker"]].visible && <div style={{ order: sectionsMap["Tracker"] }}>
                 <Divider
                     mx="sm"
                     mt="md"
-                    label="Trackers"
+                    label="Tracker"
                     labelPosition="center"
                 />
                 {Object.keys(trackers).sort().map((tracker) =>
