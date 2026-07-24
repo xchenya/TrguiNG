@@ -61,12 +61,12 @@ function AddCommon(props: AddCommonProps) {
             && <TorrentLabels
                 labels={props.labels}
                 setLabels={props.setLabels}
-                inputLabel="Labels"
+                inputLabel="用户标签"
                 disabled={props.disabled}
             />}
         <Group>
             <Checkbox
-                label="Start torrent"
+                label="自动开始"
                 checked={props.start}
                 disabled={props.disabled}
                 onChange={(e) => { props.setStart(e.currentTarget.checked); }}
@@ -74,7 +74,7 @@ function AddCommon(props: AddCommonProps) {
             />
             {rpcVersion >= 18
                 && <Checkbox
-                    label="Sequential"
+                    label="顺序下载"
                     checked={props.sequential}
                     disabled={props.disabled}
                     onChange={(e) => { props.setSequential(e.currentTarget.checked); }}
@@ -112,12 +112,12 @@ function useCommonProps(opened: boolean) {
 
     useEffect(() => {
         if (opened) {
-            if (config.values.interface.addTorrentStart === "remember selection") {
+            if (config.values.interface.addTorrentStart === "记住选择") {
                 setStart(config.values.interface.addTorrentStartSelection);
             } else {
-                setStart(config.values.interface.addTorrentStart === "default on");
+                setStart(config.values.interface.addTorrentStart === "默认开");
             }
-            if (config.values.interface.addTorrentPriority === "remember selection") {
+            if (config.values.interface.addTorrentPriority === "记住选择") {
                 setPriority(config.values.interface.addTorrentPrioritySelection);
             } else {
                 setPriority((AddTorrentPriorityOptions.indexOf(
@@ -170,7 +170,7 @@ function TabSwitchDropdown({ tabsRef }: { tabsRef: React.RefObject<ServerTabsRef
             ? <></>
             : <Menu shadow="md" width={200} position="bottom-start">
                 <Menu.Target>
-                    <Button variant="subtle" title="Switch server">
+                    <Button variant="subtle" title="切换服务器">
                         {value}
                     </Button>
                 </Menu.Target>
@@ -233,7 +233,7 @@ export function AddMagnet(props: AddCommonModalProps) {
             const duplicate = response.arguments["torrent-duplicate"];
             if (duplicate !== undefined) {
                 notifications.show({
-                    title: "Torrent already exists",
+                    title: "种子已存在",
                     message: duplicate.name,
                     color: "green",
                 });
@@ -241,7 +241,7 @@ export function AddMagnet(props: AddCommonModalProps) {
             const added = response.arguments["torrent-added"];
             if (added !== undefined) {
                 notifications.show({
-                    title: "Torrent added",
+                    title: "种子已添加",
                     message: added.name,
                     color: "green",
                 });
@@ -250,7 +250,7 @@ export function AddMagnet(props: AddCommonModalProps) {
         useCallback((e) => {
             console.error("Failed to add torrent:", e);
             notifications.show({
-                title: "Error adding torrent",
+                title: "添加种子失败",
                 message: String(e),
                 color: "red",
             });
@@ -350,7 +350,7 @@ export function AddMagnet(props: AddCommonModalProps) {
                     {
                         onSuccess: () => {
                             notifications.show({
-                                message: "Trackers updated",
+                                message: "Tracker 已更新",
                                 color: "green",
                             });
                             currentIndex++;
@@ -359,7 +359,7 @@ export function AddMagnet(props: AddCommonModalProps) {
                         onError: (error) => {
                             console.error("Failed to add trackers:", error);
                             notifications.show({
-                                title: "Error adding trackers",
+                                title: "添加 Tracker 失败",
                                 message: String(error),
                                 color: "red",
                             });
@@ -394,13 +394,13 @@ export function AddMagnet(props: AddCommonModalProps) {
                 size="xl"
                 styles={{ title: { flexGrow: 1 } }}
                 title={<Flex w="100%" align="center" justify="space-between">
-                    <span>Add torrent by magnet link or URL</span>
+                    <span>通过磁力链接或 URL 添加种子</span>
                     {TAURI && <TabSwitchDropdown tabsRef={props.tabsRef} />}
                 </Flex>}
             >
                 <Divider my="sm" />
                 <Textarea
-                    label="Magnet links, one per line"
+                    label="磁力链接，每行一个"
                     w="100%"
                     value={magnet}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => { setMagnet(e.currentTarget.value); }}
@@ -409,7 +409,7 @@ export function AddMagnet(props: AddCommonModalProps) {
                     }}
                     error={existingTorrent === undefined
                         ? undefined
-                        : "Torrent already exists"}
+                        : "种子已存在"}
                     data-autofocus
                     autoComplete="off"
                     autoCorrect="off"
@@ -426,9 +426,9 @@ export function AddMagnet(props: AddCommonModalProps) {
                         variant="filled"
                         disabled={addDisabled}
                     >
-                        {existingTorrent === undefined ? "Add" : "Add trackers"}
+                        {existingTorrent === undefined ? "添加" : "添加 Tracker"}
                     </Button>
-                    <Button onClick={props.close} variant="light">Cancel</Button>
+                    <Button onClick={props.close} variant="light">取消</Button>
                 </Group>
             </HkModal>}
     </>;
@@ -440,7 +440,7 @@ async function readLocalTorrent(file: File): Promise<string> {
         reader.onloadend = () => {
             const b64 = (reader.result as string).match(/data:[^/]*\/[^;]*;base64,(.*)/)?.[1];
             if (b64 === undefined) {
-                throw Error("Error reading file");
+                throw Error("读取文件失败");
             }
             resolve(b64);
         };
@@ -474,9 +474,9 @@ function useTauriReadFile(
             const pathPromise = typeof uri === "string"
                 ? Promise.resolve(uri)
                 : dialogOpen({
-                    title: "Select torrent file",
+                    title: "选择种子文件",
                     filters: [{
-                        name: "Torrent",
+                        name: "种子",
                         extensions: ["torrent"],
                     }],
                     multiple: true,
@@ -490,7 +490,7 @@ function useTauriReadFile(
                     }
                 }).catch((e) => {
                     notifications.show({
-                        title: "Error reading torrent",
+                        title: "读取种子失败",
                         message: String(e),
                         color: "red",
                     });
@@ -528,7 +528,7 @@ function useWebappReadFile(
                     }]);
                 }).catch(() => {
                     notifications.show({
-                        title: "Error reading file",
+                        title: "读取文件失败",
                         message: file.name,
                         color: "red",
                     });
@@ -564,7 +564,7 @@ function useFilesInput(
                     })));
                 }).catch((e) => {
                     notifications.show({
-                        title: "Error reading file",
+                        title: "读取文件失败",
                         message: e,
                         color: "red",
                     });
@@ -654,7 +654,7 @@ export function AddTorrent(props: AddCommonModalProps) {
             const duplicate = response.arguments["torrent-duplicate"];
             if (duplicate !== undefined) {
                 notifications.show({
-                    title: "Torrent already exists",
+                    title: "种子已存在",
                     message: duplicate.name,
                     color: "green",
                 });
@@ -662,7 +662,7 @@ export function AddTorrent(props: AddCommonModalProps) {
             const added = response.arguments["torrent-added"];
             if (added !== undefined) {
                 notifications.show({
-                    title: "Torrent added",
+                    title: "种子已添加",
                     message: added.name,
                     color: "green",
                 });
@@ -679,7 +679,7 @@ export function AddTorrent(props: AddCommonModalProps) {
                         {
                             onError: (e) => {
                                 notifications.show({
-                                    title: "Error renaming torrent",
+                                    title: "重命名种子失败",
                                     message: String(e),
                                     color: "red",
                                 });
@@ -694,7 +694,7 @@ export function AddTorrent(props: AddCommonModalProps) {
         useCallback((e) => {
             console.error("Failed to add torrent:", e);
             notifications.show({
-                title: "Error adding torrent",
+                title: "添加种子失败",
                 message: String(e),
                 color: "red",
             });
@@ -731,7 +731,7 @@ export function AddTorrent(props: AddCommonModalProps) {
                 {
                     onSuccess: () => {
                         notifications.show({
-                            message: "Trackers updated",
+                            message: "Tracker 已更新",
                             color: "green",
                         });
                     },
@@ -789,7 +789,7 @@ export function AddTorrent(props: AddCommonModalProps) {
                     body: { display: fullScreen ? "flex" : "block", flexDirection: "column", flexGrow: 1 },
                 }}
                 title={<Flex w="100%" align="center">
-                    <span>Add torrent</span>
+                    <span>添加种子</span>
                     <Box className={classes.flexGrow} />
                     {TAURI && <>
                         <TabSwitchDropdown tabsRef={props.tabsRef} />
@@ -801,7 +801,7 @@ export function AddTorrent(props: AddCommonModalProps) {
             >
                 <Divider my="sm" />
                 {torrentExists
-                    ? <Text c="red" fw="bold" fz="lg">Torrent already exists</Text>
+                    ? <Text c="red" fw="bold" fz="lg">种子已存在</Text>
                     : <TextInput
                         disabled={!TAURI}
                         value={torrentName}
@@ -817,7 +817,7 @@ export function AddTorrent(props: AddCommonModalProps) {
                                 variant="subtle"
                                 disabled={torrentExists}
                                 onClick={() => { setAllWanted(true); }}
-                                title="Mark all files wanted"
+                                title="全部标记为下载"
                             >
                                 All
                             </Button>
@@ -825,7 +825,7 @@ export function AddTorrent(props: AddCommonModalProps) {
                                 variant="subtle"
                                 disabled={torrentExists}
                                 onClick={() => { setAllWanted(false); }}
-                                title="Mark all files unwanted"
+                                title="全部标记为不下载"
                             >
                                 None
                             </Button>
@@ -849,9 +849,9 @@ export function AddTorrent(props: AddCommonModalProps) {
                         data-autofocus
                         disabled={torrentExists && torrentData[0].trackers.length === 0}
                     >
-                        {!torrentExists ? "Add" : "Add trackers"}
+                        {!torrentExists ? "添加" : "添加 Tracker"}
                     </Button>
-                    <Button onClick={modalClose} variant="light">Cancel</Button>
+                    <Button onClick={modalClose} variant="light">取消</Button>
                 </Group>
             </HkModal>}
     </>);

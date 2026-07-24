@@ -189,7 +189,7 @@ export const ServerTabs = React.forwardRef<ServerTabsRef, ServerTabsProps>(funct
                         </Menu.Target>
 
                         <Menu.Dropdown>
-                            <Menu.Label>Connect</Menu.Label>
+                            <Menu.Label>连接</Menu.Label>
                             {unopenedTabs.map((tab) =>
                                 <Menu.Item key={tab} onClick={() => { openTab(tab); }}>{tab}</Menu.Item>)}
                         </Menu.Dropdown>

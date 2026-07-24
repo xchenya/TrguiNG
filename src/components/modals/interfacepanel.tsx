@@ -123,9 +123,9 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
     return (
         <Tabs defaultValue="appearance" orientation="vertical" mih="29rem">
             <Tabs.List>
-                <Tabs.Tab value="appearance" p="lg">Appearance</Tabs.Tab>
-                <Tabs.Tab value="downloads" p="lg">Downloads</Tabs.Tab>
-                <Tabs.Tab value="miscellaneous" p="lg">Miscellaneous</Tabs.Tab>
+                <Tabs.Tab value="appearance" p="lg">外观</Tabs.Tab>
+                <Tabs.Tab value="downloads" p="lg">下载数</Tabs.Tab>
+                <Tabs.Tab value="miscellaneous" p="lg">其他</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panel value="appearance" p="lg">
                 <Grid align="center">
@@ -153,22 +153,22 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                     <Grid.Col span={6}>
                         <ColorChooser value={style[colorScheme].backgroundColor ?? defaultBg} onChange={setBgColor} />
                     </Grid.Col>
-                    <Grid.Col span={6}>Progress bars</Grid.Col>
+                    <Grid.Col span={6}>进度条</Grid.Col>
                     <Grid.Col span={3}>
                         <Checkbox
-                            label="Colorful"
+                            label="彩色"
                             {...props.form.getInputProps("interface.colorfulProgressbars", { type: "checkbox" })}
                         />
                     </Grid.Col>
                     <Grid.Col span={3}>
                         <Checkbox
-                            label="Animated"
+                            label="动画"
                             {...props.form.getInputProps("interface.animatedProgressbars", { type: "checkbox" })}
                         />
                     </Grid.Col>
                     <Grid.Col>
                         <Checkbox
-                            label="Custom date/time format"
+                            label="自定义日期/时间格式"
                             mt="lg"
                             {...props.form.getInputProps("interface.useCustomDateTimeFormat", { type: "checkbox" })}
                         />
@@ -195,7 +195,7 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                 <Grid align="center">
                     <Grid.Col>
                         <Checkbox
-                            label="Skip add torrent dialog"
+                            label="跳过添加种子对话框"
                             {...props.form.getInputProps("interface.skipAddDialog", { type: "checkbox" })}
                         />
                     </Grid.Col>
@@ -221,12 +221,12 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                     </Grid.Col>
                     <Grid.Col>
                         <Checkbox
-                            label="Sort download directories history alphabetically"
+                            label="按字母顺序排列下载目录历史"
                             my="lg"
                             {...props.form.getInputProps("interface.sortLastSaveDirs", { type: "checkbox" })}
                         />
                     </Grid.Col>
-                    <Grid.Col span={9}>Max number of saved download directories</Grid.Col>
+                    <Grid.Col span={9}>保存下载目录的最大数量</Grid.Col>
                     <Grid.Col span={3}>
                         <NumberInput
                             min={1}
@@ -239,7 +239,7 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                             minRows={6}
                             maxRows={6}
                             autosize
-                            label="Preconfigured directories (one per line)"
+                            label="预配置目录（每行一个）"
                             value={props.form.values.interface.preconfiguredDirs.join("\n")}
                             onChange={(e) => {
                                 props.form.setFieldValue(
@@ -254,7 +254,7 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                             value={props.form.values.interface.preconfiguredLabels}
                             onChange={setPreconfiguredLabels}
                             label={<Box>
-                                <span>Preconfigured labels</span>
+                                <span>预配置标签</span>
                                 <HoverCard width={280} shadow="md">
                                     <HoverCard.Target>
                                         <Icon.Question />
@@ -289,7 +289,7 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                             value={props.form.values.interface.ignoredTrackerPrefixes}
                             onChange={setIgnoredTrackerPrefixes}
                             label={<Box>
-                                <span>Ignored tracker prefixes</span>
+                                <span>忽略的 Tracker 前缀</span>
                                 <HoverCard width={380} shadow="md">
                                     <HoverCard.Target>
                                         <Icon.Question />
@@ -312,7 +312,7 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                             minRows={10}
                             maxRows={10}
                             autosize
-                            label="Default tracker list"
+                            label="默认 Tracker 列表"
                             value={props.form.values.interface.defaultTrackers.join("\n")}
                             onChange={(e) => {
                                 props.form.setFieldValue(

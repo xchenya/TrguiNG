@@ -152,7 +152,7 @@ export default function CreateTorrentForm() {
 
     const onBrowseFile = useCallback(() => {
         dialogOpen({
-            title: "Select file",
+            title: "选择文件",
             defaultPath: form.values.path === "" ? undefined : form.values.path,
             multiple: false,
         }).then(setPathAndCalculate).catch(console.error);
@@ -160,7 +160,7 @@ export default function CreateTorrentForm() {
 
     const onBrowseDirectory = useCallback(() => {
         dialogOpen({
-            title: "Select directory",
+            title: "选择目录",
             defaultPath: form.values.path === "" ? undefined : form.values.path,
             directory: true,
         }).then(setPathAndCalculate).catch(console.error);
@@ -211,10 +211,10 @@ export default function CreateTorrentForm() {
 
     const onSave = useCallback(() => {
         dialogSave({
-            title: "Save torrent file",
+            title: "保存种子文件",
             defaultPath: form.values.name,
             filters: [{
-                name: "Torrent",
+                name: "种子",
                 extensions: ["torrent"],
             }],
         }).then((path) => {
@@ -246,7 +246,7 @@ export default function CreateTorrentForm() {
         >
             <Group align="flex-end">
                 <TextInput
-                    label="Select file or directory"
+                    label="选择文件或目录"
                     {...form.getInputProps("path")}
                     style={{ flexGrow: 1 }}
                     readOnly
@@ -255,18 +255,18 @@ export default function CreateTorrentForm() {
                     autoCapitalize="off"
                     spellCheck="false"
                 />
-                <Button onClick={onBrowseFile} disabled={browseDisabled}>File</Button>
-                <Button onClick={onBrowseDirectory} disabled={browseDisabled}>Directory</Button>
+                <Button onClick={onBrowseFile} disabled={browseDisabled}>文件</Button>
+                <Button onClick={onBrowseDirectory} disabled={browseDisabled}>目录</Button>
             </Group>
             <TextInput
-                label="Torrent name"
+                label="种子名称"
                 {...form.getInputProps("name")}
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"
                 spellCheck="false"
             />
-            <Text fz="sm">Piece size</Text>
+            <Text fz="sm">块大小</Text>
             <Slider
                 pt="2.5rem"
                 mt="-0.5rem"
@@ -282,11 +282,11 @@ export default function CreateTorrentForm() {
                 onChange={(value) => { form.setFieldValue("pieceLength", 2 ** value); }}
             />
             <TextInput
-                label="Comment"
+                label="备注"
                 {...form.getInputProps("comment")}
             />
             <TextInput
-                label="Source (leave empty unless required by a private tracker)"
+                label="来源（除非私有 Tracker 要求，否则留空）"
                 {...form.getInputProps("source")}
                 autoComplete="off"
                 autoCorrect="off"
@@ -294,12 +294,12 @@ export default function CreateTorrentForm() {
                 spellCheck="false"
             />
             <Checkbox
-                label="Private torrent"
+                label="私有种子"
                 {...form.getInputProps("private", { type: "checkbox" })}
             />
             <Group align="flex-end">
-                <Box style={{ flexGrow: 1 }}>Tracker list, one per line, empty line between tiers</Box>
-                <Button onClick={addDefaultTrackers}>Add default list</Button>
+                <Box style={{ flexGrow: 1 }}>Tracker 列表，每行一个，层级之间空行</Box>
+                <Button onClick={addDefaultTrackers}>添加默认列表</Button>
             </Group>
             <Textarea
                 classNames={textAreaClassNames}
@@ -308,7 +308,7 @@ export default function CreateTorrentForm() {
             />
             <Textarea
                 classNames={textAreaClassNames}
-                label="Web seed URLs, one per line"
+                label="Web 种子 URL，每行一个"
                 value={form.values.urlList.join("\n")}
                 onChange={(e) => { form.setFieldValue("urlList", e.target.value.split("\n")); }}
             />
@@ -316,7 +316,7 @@ export default function CreateTorrentForm() {
                 {state.state === "error"
                     && <Text c="red">{state.error}</Text>}
                 {state.state === "calculating"
-                    && <Text>Calculating sizes...</Text>}
+                    && <Text>正在计算大小...</Text>}
                 {state.state === "sizes"
                     && <Text>
                         {`${state.sizes?.files ?? 1} file${(state.sizes?.files ?? 1) > 1 ? "s" : ""}, `}
@@ -335,11 +335,11 @@ export default function CreateTorrentForm() {
             </Box>
             <Group justify="center">
                 {(["idle", "error", "calculating", "sizes"].includes(state.state))
-                    && <Button miw="10rem" onClick={onGenerate} disabled={state.state === "calculating"}>Generate</Button>}
+                    && <Button miw="10rem" onClick={onGenerate} disabled={state.state === "calculating"}>生成</Button>}
                 {state.state === "generating"
-                    && <Button miw="10rem" onClick={onCancel} color="red">Cancel</Button>}
+                    && <Button miw="10rem" onClick={onCancel} color="red">取消</Button>}
                 {state.state === "done"
-                    && <Button miw="10rem" onClick={onSave} color="green">Save</Button>}
+                    && <Button miw="10rem" onClick={onSave} color="green">保存</Button>}
             </Group>
         </Flex>
     );
