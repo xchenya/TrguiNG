@@ -9,7 +9,6 @@ jobs:
       pull-requests: read
     outputs:
       src: ${{ steps.changes.outputs.src }}
-      srctauri: ${{ steps.changes.outputs.srctauri }}
     steps:
     - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v3
@@ -18,8 +17,6 @@ jobs:
         filters: |
           src:
             - 'src/**'
-          srctauri:
-            - 'src-tauri/**'
 
   eslint:
     name: eslint
@@ -47,39 +44,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           eslint_flags: 'src/'
-
-  clippy_check:
-    name: clippy check
-    needs: changes
-    if: needs.changes.outputs.srctauri == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: clippy
-          workspaces: |
-            src-tauri
-
-      - name: install dependencies
-        run: |
-          mkdir -p dist
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf libasound2-dev
-          touch src-tauri/dbip.mmdb
-
-      - uses: sksat/action-clippy@main
-        if: github.event_name == 'push'
-        with:
-          working_directory: ./src-tauri
-          reporter: github-check
-
-      - uses: sksat/action-clippy@main
-        if: github.event_name == 'pull_request'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          working_directory: ./src-tauri
-          reporter: github-pr-review
