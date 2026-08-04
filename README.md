@@ -1,5 +1,12 @@
 
-## 基于 [openscopeproject/TrguiNG](https://github.com/openscopeproject/TrguiNG) 汉化并增加部分功能
+## 基于 [jayzcoder/TrguiNG](https://github.com/jayzcoder/TrguiNG) 增加部分功能
+
+### 更新 (260803a)
+1. add: 忽略错误功能（支持通配符过滤，可在参数设置>其他设置中配置）
+2. add: 忽略错误开关（支持右键菜单和设置面板启用/禁用）
+3. add: tooltip汉化 Rename (F2) -> 重命名 (F2)
+4. add: AGENTS.md项目文档
+5. impr: 升级webpack-cli到v7以支持ESM top-level await
 
 ### 更新 (240607a)
 1. merge: openscopeproject/TrguiNG
