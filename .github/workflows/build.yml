@@ -78,7 +78,6 @@ jobs:
           name: build web
           path: artifacts
 
-      # Generate changelog
       - id: prevtag
         run: |
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo '')
@@ -87,7 +86,8 @@ jobs:
       - name: Generate changelog
         id: changelog
         uses: jaywcjlove/changelog-generator@main
-        if: steps.prevtag.outputs.previous_tag
+        if: steps.prevtag.outputs.previous_tag != ''
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           show-emoji: false
@@ -100,6 +100,6 @@ jobs:
           draft: true
           files: ./artifacts/*
           body: |
-            ${{ steps.changelog.outputs.compareurl }}
+            ${{ steps.changelog.outputs.compareurl || '' }}
 
-            ${{ steps.changelog.outputs.changelog }}
+            ${{ steps.changelog.outputs.changelog || '' }}
