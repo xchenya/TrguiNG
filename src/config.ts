@@ -67,22 +67,22 @@ export type TableName = typeof TableNames[number];
 
 export type SplitType = "vertical" | "horizontal";
 
-const FilterSections = ["种子状态", "数据目录", "用户标签", "Tracker"] as const;
+const FilterSections = ["Status", "Directories", "Labels", "Trackers"] as const;
 export type FilterSectionName = typeof FilterSections[number];
 
 const StatusFilters = [
-    "全部", "下载中", "已完成", "活动中", "未活动", "工作中", "已暂停", "错误", "等待中", "磁力链接",
+    "All Torrents", "Downloading", "Completed", "Active", "Inactive", "Running", "Stopped", "Error", "Waiting", "Magnetizing",
 ] as const;
 export type StatusFilterName = typeof StatusFilters[number];
 type StatusFiltersVisibility = Record<StatusFilterName, boolean>;
 
 const StatusbarSections = [
-    "连接状态", "下载速度", "上传速度", "剩余空间", "列表总大小", "选中大小",
+    "Connection", "Download speed ", "Upload speed", "Free space", "Total", "Selected",
 ] as const;
 type StatusbarSectionName = typeof StatusbarSections[number];
 
 const DetailsSections = [
-    "常规", "文件", "块", "用户数", "Tracker", "<spacer>", "服务器统计",
+    "General", "Files", "Pieces", "Peers", "Trackers", "<spacer>", "Server statistics",
 ] as const;
 type DetailsSectionsName = typeof DetailsSections[number];
 
@@ -93,9 +93,9 @@ export type SectionsVisibility<S extends string> = Array<{
 
 export const WindowMinimizeOptions = ["minimize", "hide"] as const;
 export const WindowCloseOptions = ["hide", "close", "quit"] as const;
-export const DeleteTorrentDataOptions = ["默认关", "默认开", "记住选择"] as const;
+export const DeleteTorrentDataOptions = ["default off", "default on", "remember selection"] as const;
 export const AddTorrentStartOptions = DeleteTorrentDataOptions;
-export const AddTorrentPriorityOptions = ["默认低", "默认正常", "默认高", "记住选择"] as const;
+export const AddTorrentPriorityOptions = ["default low", "default normal", "default high", "remember selection"] as const;
 export const DateFormatOptions = [
     "dd-mm-yyyy",
     "dd/mm/yyyy",
@@ -285,7 +285,7 @@ const DefaultSettings: Settings = {
         statusFiltersVisibility: Object.fromEntries(
             StatusFilters.map((filterName) => [
                 filterName,
-                !["工作中", "磁力链接"].includes(filterName),
+                !["Running", "Magnetizing"].includes(filterName),
             ]),
         ) as Record<StatusFilterName, boolean>,
         compactDirectories: false,
@@ -306,12 +306,12 @@ const DefaultSettings: Settings = {
         flatFileTree: false,
         mainSplit: "vertical",
         skipAddDialog: false,
-        addTorrentStart: "默认开",
+        addTorrentStart: "default on",
         addTorrentStartSelection: true,
         addTorrentSequential: false,
-        addTorrentPriority: "默认正常",
+        addTorrentPriority: "default normal",
         addTorrentPrioritySelection: 0, // normal priority
-        deleteTorrentData: "默认关",
+        deleteTorrentData: "default off",
         deleteTorrentDataSelection: false,
         numLastSaveDirs: 20,
         sortLastSaveDirs: false,
@@ -359,7 +359,7 @@ export class Config {
                 this.values.openTabs = undefined;
             }
             if (this.values.interface.progressbarStyle !== undefined) {
-                this.values.interface.animatedProgressbars = this.values.interface.progressbarStyle === "动态";
+                this.values.interface.animatedProgressbars = this.values.interface.progressbarStyle === "animated";
                 this.values.interface.colorfulProgressbars = this.values.interface.progressbarStyle === "colorful";
                 this.values.interface.progressbarStyle = undefined;
             }

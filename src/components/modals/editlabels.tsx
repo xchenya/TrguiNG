@@ -50,8 +50,8 @@ export function EditLabelsModal(props: ModalState) {
     const onSave = useCallback(() => {
         if (rpcVersion < 16) {
             notifications.show({
-                title: "无法设置标签",
-                message: "用户标签功能需要 Transmission 3.0 或更高版本",
+                title: "Can not set labels",
+                message: "Labels feature requires transmission 3.0 or later",
                 color: "red",
             });
             close();
@@ -65,13 +65,13 @@ export function EditLabelsModal(props: ModalState) {
             {
                 onSuccess: () => {
                     notifications.show({
-                        message: "用户标签已更新",
+                        message: "Labels are updated",
                         color: "green",
                     });
                 },
                 onError: (error) => {
                     notifications.show({
-                        title: "更新用户标签失败",
+                        title: "Failed to update labels",
                         message: String(error),
                         color: "red",
                     });
@@ -89,12 +89,12 @@ export function EditLabelsModal(props: ModalState) {
                 onClose={props.close}
                 onSave={onSave}
                 centered
-                title="编辑种子标签"
+                title="Edit torrent labels"
             >
                 {rpcVersion < 16
-                    ? <Text color="red" fz="lg">用户标签功能需要 Transmission 3.0 或更高版本</Text>
+                    ? <Text color="red" fz="lg">Labels feature requires transmission 3.0 or later</Text>
                     : <>
-                        <Text mb="md">为以下种子输入新标签</Text>
+                        <Text mb="md">Enter new labels for</Text>
                         <TorrentsNames />
                     </>}
                 <Box mih="17rem">

@@ -57,7 +57,7 @@ export function VersionModal({ opened, close }: ModalState) {
             centered
             p="lg"
             styles={{ header: { padding: "1em", alignItems: "start" } }}
-            title={<Text size="2em" fw="bold">TrguiNG 中文版</Text>}
+            title={<Text size="2em" fw="bold">TrguiNG</Text>}
         >
             <Text>
                 Remote interface for&nbsp;
@@ -68,13 +68,13 @@ export function VersionModal({ opened, close }: ModalState) {
             <Flex gap="md" align="center">
                 <AppLogo style={{ flexShrink: 0 }} />
                 <Grid>
-                    <Grid.Col span={4}>版本</Grid.Col>
+                    <Grid.Col span={4}>Version</Grid.Col>
                     <Grid.Col span={8}>{appVersion.gitVersion}</Grid.Col>
-                    <Grid.Col span={4}>前端</Grid.Col>
+                    <Grid.Col span={4}>Frontend</Grid.Col>
                     <Grid.Col span={8}>{frontend}</Grid.Col>
-                    <Grid.Col span={4}>构建日期</Grid.Col>
+                    <Grid.Col span={4}>Build date</Grid.Col>
                     <Grid.Col span={8}>{new Date(appVersion.buildDate).toLocaleString()}</Grid.Col>
-                    <Grid.Col span={4}>源代码</Grid.Col>
+                    <Grid.Col span={4}>Source code</Grid.Col>
                     <Grid.Col span={8}>
                         <Box component="span" mr="sm"><Github /></Box>
                         <Anchor href="https://github.com/openscopeproject/trguing/" target="_blank" rel="noreferrer">github</Anchor>

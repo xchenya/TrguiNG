@@ -63,9 +63,9 @@ export function SaveCancelModal({ onSave, onClose, children, saveLoading, ...oth
             <Divider my="sm" />
             <Group justify="center" gap="md">
                 <Button onClick={onSave} variant="filled" data-autofocus>
-                    {saveLoading === true ? <Loader size="1rem" /> : "保存"}
+                    {saveLoading === true ? <Loader size="1rem" /> : "Save"}
                 </Button>
-                <Button onClick={onClose} variant="light">取消</Button>
+                <Button onClick={onClose} variant="light">Cancel</Button>
             </Group>
         </HkModal>
     );
@@ -147,7 +147,7 @@ export function useTorrentLocation(): LocationData {
     const browseHandler = useCallback(() => {
         const mappedLocation = pathMapFromServer(path, serverConfig);
         dialogOpen({
-            title: "选择目录",
+            title: "Select directory",
             defaultPath: mappedLocation === "" ? undefined : mappedLocation,
             directory: true,
         }).then((directory) => {
@@ -226,7 +226,7 @@ export function TorrentLocation(props: LocationData) {
                                             <ActionIcon
                                                 variant="subtle"
                                                 component="div"
-                                                title="移除路径"
+                                                title="Remove path"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     props.removePath(path);
@@ -249,7 +249,7 @@ export function TorrentLocation(props: LocationData) {
                 autoCapitalize="off"
                 spellCheck="false"
             />
-            {TAURI && <Button onClick={props.browseHandler} disabled={props.disabled}>浏览</Button>}
+            {TAURI && <Button onClick={props.browseHandler} disabled={props.disabled}>Browse</Button>}
         </Group>
     );
 }

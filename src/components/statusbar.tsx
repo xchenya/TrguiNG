@@ -123,42 +123,42 @@ export function Statusbar({ session, torrents, filteredTorrents, selectedTorrent
                         setShowGlobalSpeeds(!showGlobalSpeeds);
                     }}
                 >
-                    显示全局速度
+                    Show global speeds
                 </Menu.Item>
             </MemoSectionsContextMenu>
-            {sections[sectionsMap["连接状态"]].visible
-                && <div style={{ flex: "1 1 23%", order: sectionsMap["连接状态"] }}>
+            {sections[sectionsMap.Connection].visible
+                && <div style={{ flex: "1 1 23%", order: sectionsMap.Connection }}>
                     <Box component="span" my="auto" mr="xs"><Icon.Diagram2 /></Box>
-                    <span>{`${session?.version as string ?? "<未连接>"} at ${hostname}`}</span>
+                    <span>{`${session?.version as string ?? "<not connected>"} at ${hostname}`}</span>
                 </div>}
-            {sections[sectionsMap["下载速度"]].visible
-                && <div style={{ flex: "1 1 15%", order: sectionsMap["下载速度"] }}>
+            {sections[sectionsMap["Download speed "]].visible
+                && <div style={{ flex: "1 1 15%", order: sectionsMap["Download speed "] }}>
                     <Box component="span" my="auto" mr="xs">
                         {showGlobalSpeeds && <Icon.Globe />}
                         <Icon.ArrowDown />
                     </Box>
                     <span>{`${downRate}/s (${byteRateToHumanReadableStr(serverFields.downRateLimit * 1024)})`}</span>
                 </div>}
-            {sections[sectionsMap["上传速度"]].visible
-                && <div style={{ flex: "1 1 15%", order: sectionsMap["上传速度"] }}>
+            {sections[sectionsMap["Upload speed"]].visible
+                && <div style={{ flex: "1 1 15%", order: sectionsMap["Upload speed"] }}>
                     <Box component="span" my="auto" mr="xs">
                         {showGlobalSpeeds && <Icon.Globe />}
                         <Icon.ArrowUp />
                     </Box>
                     <span>{`${upRate}/s (${byteRateToHumanReadableStr(serverFields.upRateLimit * 1024)})`}</span>
                 </div>}
-            {sections[sectionsMap["剩余空间"]].visible
-                && <div style={{ flex: "1 1 12%", order: sectionsMap["剩余空间"] }}>
+            {sections[sectionsMap["Free space"]].visible
+                && <div style={{ flex: "1 1 12%", order: sectionsMap["Free space"] }}>
                     <Box component="span" my="auto" mr="xs"><Icon.Hdd /></Box>
-                    <span>{`剩余空间: ${bytesToHumanReadableStr(serverFields.free)}`}</span>
+                    <span>{`Free: ${bytesToHumanReadableStr(serverFields.free)}`}</span>
                 </div>}
-            {sections[sectionsMap["列表总大小"]].visible
-                && <div style={{ flex: "1 1 12%", order: sectionsMap["列表总大小"] }}>
-                    {`列表总大小: ${sizeTotal}`}
+            {sections[sectionsMap.Total].visible
+                && <div style={{ flex: "1 1 12%", order: sectionsMap.Total }}>
+                    {`Total: ${sizeTotal}`}
                 </div>}
-            {sections[sectionsMap["选中大小"]].visible
-                && <div style={{ flex: "1 1 23%", order: sectionsMap["选中大小"] }}>
-                    {`选中大小: ${sizeSelected}，已完成 ${sizeDone}，剩余 ${sizeLeft}`}
+            {sections[sectionsMap.Selected].visible
+                && <div style={{ flex: "1 1 23%", order: sectionsMap.Selected }}>
+                    {`Selected: ${sizeSelected}, done ${sizeDone}, left ${sizeLeft}`}
                 </div>}
             {(!TAURI || showMisc)
                 && <div style={{ flexShrink: 0, display: "flex", order: 100 }}>

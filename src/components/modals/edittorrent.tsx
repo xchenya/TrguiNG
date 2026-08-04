@@ -92,7 +92,7 @@ export function EditTorrent(props: ModalState) {
                 onError: (e) => {
                     console.error("Failed to update torrent properties", e);
                     notifications.show({
-                        message: "更新种子失败",
+                        message: "Error updating torrent",
                         color: "red",
                     });
                 },
@@ -109,7 +109,7 @@ export function EditTorrent(props: ModalState) {
                 onClose={props.close}
                 onSave={onSave}
                 centered
-                title="编辑种子属性"
+                title="Edit torrent properties"
                 mih="25rem"
             >
                 <LoadingOverlay visible={isLoading} />
@@ -120,7 +120,7 @@ export function EditTorrent(props: ModalState) {
                     <Grid.Col span={8}>
                         <Checkbox
                             my="sm"
-                            label="遵循会话上传限制"
+                            label="Honor session upload limit"
                             {...form.getInputProps("honorsSessionLimits", { type: "checkbox" })}
                         />
                     </Grid.Col>
@@ -128,13 +128,13 @@ export function EditTorrent(props: ModalState) {
                         {rpcVersion >= 18
                             && <Checkbox
                                 my="sm"
-                                label="顺序下载"
+                                label="Sequential download"
                                 {...form.getInputProps("sequentialDownload", { type: "checkbox" })}
                             />}
                     </Grid.Col>
                     <Grid.Col span={8}>
                         <Checkbox
-                            label="最大下载速度"
+                            label="Maximum download speed"
                             {...form.getInputProps("downloadLimited", { type: "checkbox" })}
                         />
                     </Grid.Col>
@@ -150,7 +150,7 @@ export function EditTorrent(props: ModalState) {
                     </Grid.Col>
                     <Grid.Col span={8}>
                         <Checkbox
-                            label="最大上传速度"
+                            label="Maximum upload speed"
                             {...form.getInputProps("uploadLimited", { type: "checkbox" })}
                         />
                     </Grid.Col>
@@ -176,7 +176,7 @@ export function EditTorrent(props: ModalState) {
                     <Grid.Col span={2} />
                     <Grid.Col span={8}>
                         <Checkbox
-                            label="分享率"
+                            label="Seed ratio"
                             checked={form.values.seedRatioMode < 2}
                             indeterminate={form.values.seedRatioMode === 0}
                             onChange={() => { form.setFieldValue("seedRatioMode", (form.values.seedRatioMode + 1) % 3); }}
@@ -195,7 +195,7 @@ export function EditTorrent(props: ModalState) {
                     <Grid.Col span={2} />
                     <Grid.Col span={8}>
                         <Checkbox
-                            label="无活动达到此时间后停止做种"
+                            label="Stop seeding when inactive for"
                             checked={form.values.seedIdleMode < 2}
                             indeterminate={form.values.seedIdleMode === 0}
                             onChange={() => { form.setFieldValue("seedIdleMode", (form.values.seedIdleMode + 1) % 3); }}
