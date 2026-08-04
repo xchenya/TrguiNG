@@ -168,6 +168,8 @@ interface Settings {
         sortLastSaveDirs: boolean,
         preconfiguredLabels: string[],
         defaultTrackers: string[],
+        ignoredErrors: string[],
+        ignoreErrors: boolean,
         styleOverrides: StyleOverrides,
         progressbarStyle: ProgressbarStyleOption,
     },
@@ -274,6 +276,8 @@ const DefaultSettings: Settings = {
         sortLastSaveDirs: false,
         preconfiguredLabels: [],
         defaultTrackers: [...DefaultTrackerList],
+        ignoredErrors: [],
+        ignoreErrors: false,
         styleOverrides: {
             dark: {},
             light: {},

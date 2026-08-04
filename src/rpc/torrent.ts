@@ -60,6 +60,24 @@ function getTorrentError(t: TorrentBase): string {
     }
 }
 
+function globToRegex(glob: string): RegExp {
+    const escaped = glob.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+    const pattern = escaped.replace(/\*/g, ".*").replace(/\?/g, ".");
+    return new RegExp(`^${pattern}$`, "i");
+}
+
+function isErrorIgnored(error: string, ignoredErrors: string[]): boolean {
+    if (error === "") return false;
+    for (const pattern of ignoredErrors) {
+        if (pattern === "" || pattern.trim() === "") continue;
+        if (pattern === error) return true;
+        try {
+            if (globToRegex(pattern).test(error)) return true;
+        } catch { /* ignore invalid patterns */ }
+    }
+    return false;
+}
+
 export function getTrackerAnnounceState(tracker: TrackerStats) {
     if (tracker.announceState === 3) return "工作(上传中)";
     if (tracker.hasAnnounced as boolean) {
@@ -103,15 +121,24 @@ function getPeersTotal(t: TorrentBase) {
     return peers;
 }
 
-export async function processTorrent(t: TorrentBase, lookupIps: boolean, client: TransmissionClient): Promise<Torrent> {
+export async function processTorrent(t: TorrentBase, lookupIps: boolean, client: TransmissionClient, ignoredErrors?: string[]): Promise<Torrent> {
     const peers = t.peers === undefined
         ? undefined
         : await Promise.all(t.peers.map(async (p: PeerStatsBase) => await processPeerStats(p, lookupIps, client)));
 
+    let cachedError = getTorrentError(t);
+    let error = t.error as number;
+
+    if (ignoredErrors !== undefined && ignoredErrors.length > 0 && isErrorIgnored(cachedError, ignoredErrors)) {
+        cachedError = "";
+        error = 0;
+    }
+
     return {
         ...t,
+        error,
         downloadDir: (t.downloadDir as string).replaceAll("\\", "/"),
-        cachedError: getTorrentError(t),
+        cachedError,
         cachedTrackerStatus: getTrackerStatus(t),
         cachedMainTracker: getTorrentMainTracker(t),
         cachedSeedsTotal: getSeedsTotal(t),

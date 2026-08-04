@@ -508,6 +508,7 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
     const [hideSubDirTorrents, setHideSubDirTorrents] = useState(config.values.interface.hideSubDirTorrents);
     const [showFilterGroupSize, setShowFilterGroupSize] = useState(config.values.interface.showFilterGroupSize);
     const [selectFilterGroupOnDbClk, setSelectFilterGroupOnDbClk] = useState(config.values.interface.selectFilterGroupOnDbClk);
+    const [ignoreErrors, setIgnoreErrors] = useState(config.values.interface.ignoreErrors);
 
     useEffect(() => {
         config.values.interface.filterSections = sections;
@@ -516,8 +517,9 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
         config.values.interface.hideSubDirTorrents = hideSubDirTorrents;
         config.values.interface.showFilterGroupSize = showFilterGroupSize;
         config.values.interface.selectFilterGroupOnDbClk = selectFilterGroupOnDbClk;
+        config.values.interface.ignoreErrors = ignoreErrors;
         setSectionsMap(getSectionsMap(sections));
-    }, [config, sections, statusFiltersVisibility, compactDirectories, hideSubDirTorrents, showFilterGroupSize, selectFilterGroupOnDbClk]);
+    }, [config, sections, statusFiltersVisibility, compactDirectories, hideSubDirTorrents, showFilterGroupSize, selectFilterGroupOnDbClk, ignoreErrors]);
 
     const [info, setInfo, handler] = useContextMenu();
 
@@ -571,6 +573,11 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
         e.stopPropagation();
         setSelectFilterGroupOnDbClk(!selectFilterGroupOnDbClk);
     }, [setSelectFilterGroupOnDbClk, selectFilterGroupOnDbClk]);
+
+    const onIgnoreErrorsClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIgnoreErrors(!ignoreErrors);
+    }, [setIgnoreErrors, ignoreErrors]);
 
     return (<>
         <Menu
@@ -676,6 +683,13 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                     onMouseDown={onSelectFilterGroupOnDbClkClick}
                 >
                     双击全选分组
+                </Menu.Item>
+                <Menu.Item
+                    icon={ignoreErrors ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                    onMouseEnter={closeStatusFiltersSubmenu}
+                    onMouseDown={onIgnoreErrorsClick}
+                >
+                    忽略错误
                 </Menu.Item>
             </MemoSectionsContextMenu>
             {sections[sectionsMap["种子状态"]]?.visible && <div style={{ order: sectionsMap["种子状态"] }}>

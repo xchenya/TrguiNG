@@ -52,6 +52,7 @@ const BandwidthGroupKeys = {
 
 export function useTorrentList(enabled: boolean, fields: TorrentFieldsType[]) {
     const serverConfig = useContext(ServerConfigContext);
+    const config = useContext(ConfigContext);
     const client = useTransmissionClient();
 
     const [minimized, setMinimized] = useState(false);
@@ -86,14 +87,16 @@ export function useTorrentList(enabled: boolean, fields: TorrentFieldsType[]) {
         enabled,
         queryFn: useCallback(async () => {
             const torrents = await client.getTorrents(fields);
+            const ignoredErrors = config.values.interface.ignoreErrors ? config.values.interface.ignoredErrors : [];
             return await Promise.all(torrents.map(
-                async (t: TorrentBase) => await processTorrent(t, false, client)));
+                async (t: TorrentBase) => await processTorrent(t, false, client, ignoredErrors)));
         }, [client, fields]),
     });
 }
 
 export function useTorrentDetails(torrentId: number, enabled: boolean, lookupIps: boolean, disableRefetch?: boolean) {
     const serverConfig = useContext(ServerConfigContext);
+    const config = useContext(ConfigContext);
     const client = useTransmissionClient();
 
     return useQuery({
@@ -102,7 +105,8 @@ export function useTorrentDetails(torrentId: number, enabled: boolean, lookupIps
         staleTime: 1000 * 5,
         enabled,
         queryFn: useCallback(async () => {
-            return await processTorrent(await client.getTorrentDetails(torrentId), TAURI && lookupIps, client);
+            const ignoredErrors = config.values.interface.ignoreErrors ? config.values.interface.ignoredErrors : [];
+            return await processTorrent(await client.getTorrentDetails(torrentId), TAURI && lookupIps, client, ignoredErrors);
         }, [client, torrentId, lookupIps]),
     });
 }

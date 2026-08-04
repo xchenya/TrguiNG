@@ -39,6 +39,8 @@ export interface InterfaceFormValues {
         sortLastSaveDirs: boolean,
         preconfiguredLabels: string[],
         defaultTrackers: string[],
+        ignoredErrors: string[],
+        ignoreErrors: boolean,
     },
 }
 
@@ -179,6 +181,21 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                     onChange={(e) => {
                         props.form.setFieldValue(
                             "interface.defaultTrackers", e.currentTarget.value.split("\n") as any);
+                    }} />
+            </Grid.Col>
+            <Grid.Col span={6}>
+                <Checkbox label="启用忽略错误"
+                    {...props.form.getInputProps("interface.ignoreErrors", { type: "checkbox" })} />
+            </Grid.Col>
+            <Grid.Col span={6}></Grid.Col>
+            <Grid.Col>
+                <Textarea minRows={4}
+                    label="忽略错误(一行一个，支持通配符)"
+                    placeholder={"Tracker: Connection timed out\nNo data found*"}
+                    value={props.form.values.interface.ignoredErrors.join("\n")}
+                    onChange={(e) => {
+                        props.form.setFieldValue(
+                            "interface.ignoredErrors", e.currentTarget.value.split("\n").filter(s => s !== "") as any);
                     }} />
             </Grid.Col>
         </Grid>
