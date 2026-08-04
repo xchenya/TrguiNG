@@ -325,6 +325,7 @@ export function AppSettingsModal(props: AppSettingsModalProps) {
     const [currentServerIndex, setCurrentServerIndex] = useState(-1);
     const { setValues } = form;
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (props.opened) {
             setValues({
@@ -334,7 +335,7 @@ export function AppSettingsModal(props: AppSettingsModalProps) {
             });
             setCurrentServerIndex(config.getServers().length > 0 ? 0 : -1);
         }
-    }, [config, props.opened, setValues]);
+    }, [props.opened]);
 
     const onSave = useCallback(() => {
         form.validate();
