@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
       - uses: reviewdog/action-eslint@v1
         if: github.event_name == 'push'
         with:
