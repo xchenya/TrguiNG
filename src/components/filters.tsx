@@ -508,7 +508,6 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
     const [hideSubDirTorrents, setHideSubDirTorrents] = useState(config.values.interface.hideSubDirTorrents);
     const [showFilterGroupSize, setShowFilterGroupSize] = useState(config.values.interface.showFilterGroupSize);
     const [selectFilterGroupOnDbClk, setSelectFilterGroupOnDbClk] = useState(config.values.interface.selectFilterGroupOnDbClk);
-    const [ignoreErrors, setIgnoreErrors] = useState(config.values.interface.ignoreErrors);
 
     useEffect(() => {
         config.values.interface.filterSections = sections;
@@ -517,9 +516,8 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
         config.values.interface.hideSubDirTorrents = hideSubDirTorrents;
         config.values.interface.showFilterGroupSize = showFilterGroupSize;
         config.values.interface.selectFilterGroupOnDbClk = selectFilterGroupOnDbClk;
-        config.values.interface.ignoreErrors = ignoreErrors;
         setSectionsMap(getSectionsMap(sections));
-    }, [config, sections, statusFiltersVisibility, compactDirectories, hideSubDirTorrents, showFilterGroupSize, selectFilterGroupOnDbClk, ignoreErrors]);
+    }, [config, sections, statusFiltersVisibility, compactDirectories, hideSubDirTorrents, showFilterGroupSize, selectFilterGroupOnDbClk]);
 
     const [info, setInfo, handler] = useContextMenu();
 
@@ -576,8 +574,9 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
 
     const onIgnoreErrorsClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        setIgnoreErrors(!ignoreErrors);
-    }, [setIgnoreErrors, ignoreErrors]);
+        config.values.interface.ignoreErrors = !config.values.interface.ignoreErrors;
+        setSectionsMap(getSectionsMap(sections));
+    }, [config, sections]);
 
     return (<>
         <Menu
@@ -685,7 +684,7 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                     双击全选分组
                 </Menu.Item>
                 <Menu.Item
-                    icon={ignoreErrors ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                    icon={config.values.interface.ignoreErrors ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
                     onMouseEnter={closeStatusFiltersSubmenu}
                     onMouseDown={onIgnoreErrorsClick}
                 >
