@@ -437,7 +437,6 @@ export function TorrentTable(props: {
     openTorrentDetails: (id: string) => void,
     selectedReducer: TableSelectReducer,
     mobileSelectionMode: boolean,
-    enterMobileSelectionMode: () => void,
     onColumnVisibilityChange: React.Dispatch<TorrentFieldsType[]>,
     scrollToRow?: { id: string },
     setStatus: (status: RunStatus) => void,
@@ -503,7 +502,6 @@ export function TorrentTable(props: {
                     openTorrentDetails={props.openTorrentDetails}
                     openContextMenu={openContextMenu}
                     selectionMode={props.mobileSelectionMode}
-                    enterSelectionMode={props.enterMobileSelectionMode}
                     scrollToRow={props.scrollToRow}
                 />
                 : <TrguiTable<Torrent> {...{

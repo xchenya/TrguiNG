@@ -247,13 +247,13 @@ function MobileToolbar(props: ToolbarProps) {
     return (
         <Flex direction="column" w="100%">
             {props.mobileSelectionMode
-                ? <Flex w="100%" align="center" justify="space-between" gap="xs" p="xs">
+                ? <Flex className="mobile-selection-header" w="100%" align="center" justify="space-between" gap="xs" p="xs">
                     <Button variant="subtle" compact onClick={props.exitMobileSelectionMode}>取消</Button>
                     <Text weight={600}>已选 {serverSelected.size} 项</Text>
                     <Button variant="subtle" compact onClick={props.selectAllMobileTorrents}>全选</Button>
                 </Flex>
                 : <>
-                    <Flex w="100%" align="center" gap="xs" p="xs" pb={4}>
+                    <Flex className="mobile-browse-header" w="100%" align="center" gap="xs" p="xs" pb={4}>
                         <ActionIcon variant="default" size="lg" onClick={props.openFiltersDrawer} title="高级筛选">
                             <Icon.Funnel size="1.1rem" />
                         </ActionIcon>

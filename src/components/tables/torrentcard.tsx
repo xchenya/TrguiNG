@@ -35,7 +35,6 @@ interface TorrentCardProps {
     openContextMenu: (x: number, y: number) => void,
     openTorrentDetails: (id: string) => void,
     selectionMode: boolean,
-    enterSelectionMode: () => void,
 }
 
 function torrentEta(torrent: Torrent): string {
@@ -82,9 +81,8 @@ function TorrentCard(props: TorrentCardProps) {
 
     const onSelectClick = useCallback((event: React.MouseEvent) => {
         event.stopPropagation();
-        if (!props.selectionMode) props.enterSelectionMode();
         selectedReducer({ verb: "toggle", ids: [String(torrent.id)] });
-    }, [props, selectedReducer, torrent.id]);
+    }, [selectedReducer, torrent.id]);
 
     const onMoreClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation();
@@ -107,14 +105,15 @@ function TorrentCard(props: TorrentCardProps) {
             boxShadow: props.selected ? theme.shadows.sm : undefined,
         }}
     >
-        <Flex align="center" gap="xs" mb={6}>
-            <Checkbox
-                checked={props.selectionMode && props.selected}
+        <Flex className={`torrent-card-header ${props.selectionMode ? "selection-mode" : "browse-mode"}`} align="center" gap="xs" mb={6}>
+            {props.selectionMode && <Checkbox
+                className="torrent-card-checkbox"
+                checked={props.selected}
                 onClick={onSelectClick}
                 onChange={() => {}}
                 aria-label={`选择 ${String(torrent.name)}`}
                 size="md"
-            />
+            />}
             <Box sx={{ flexShrink: 0 }}><StatusIcon /></Box>
             <Text weight={600} size="md" lineClamp={2} sx={{ flexGrow: 1, lineHeight: 1.25 }}>
                 {torrent.name}
@@ -167,7 +166,6 @@ export function MobileTorrentList(props: {
     scrollToRow?: { id: string },
     openTorrentDetails: (id: string) => void,
     selectionMode: boolean,
-    enterSelectionMode: () => void,
 }) {
     const parentRef = useRef<HTMLDivElement | null>(null);
     const rowHeight = 160;
@@ -212,7 +210,6 @@ export function MobileTorrentList(props: {
                         openContextMenu={props.openContextMenu}
                         openTorrentDetails={props.openTorrentDetails}
                         selectionMode={props.selectionMode}
-                        enterSelectionMode={props.enterSelectionMode}
                     />
                 </Box>;
             })}

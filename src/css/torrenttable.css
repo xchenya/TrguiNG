@@ -104,6 +104,81 @@
     overflow: hidden;
 }
 
+.torrent-card-header.selection-mode {
+    animation: torrent-card-header-enter-selection 150ms ease-out;
+}
+
+.torrent-card-header.browse-mode {
+    animation: torrent-card-header-enter-browse 150ms ease-out;
+}
+
+.torrent-card-checkbox {
+    animation: torrent-card-checkbox-enter 150ms ease-out;
+    transform-origin: left center;
+}
+
+.mobile-browse-header,
+.mobile-selection-header {
+    animation: mobile-toolbar-mode-enter 150ms ease-out;
+}
+
+@keyframes torrent-card-checkbox-enter {
+    from {
+        opacity: 0;
+        transform: translateX(-0.4rem) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes torrent-card-header-enter-selection {
+    from {
+        opacity: 0.85;
+        transform: translateX(-0.4rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes torrent-card-header-enter-browse {
+    from {
+        opacity: 0.85;
+        transform: translateX(1.8rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes mobile-toolbar-mode-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-0.2rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .torrent-card-header,
+    .torrent-card-checkbox,
+    .mobile-browse-header,
+    .mobile-selection-header {
+        animation: none;
+    }
+}
+
 .torrent-card .progressbar {
     height: 1rem;
 }

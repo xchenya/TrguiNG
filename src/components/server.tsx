@@ -380,7 +380,6 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                                         openTorrentDetails={openTorrentDetails}
                                         selectedReducer={selectedReducer}
                                         mobileSelectionMode={mobileSelectionMode}
-                                        enterMobileSelectionMode={enterMobileSelectionMode}
                                         onColumnVisibilityChange={setTableRequiredFields}
                                         scrollToRow={scrollToRow}
                                         setStatus={updateStatus} />}
@@ -394,7 +393,6 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                                 openTorrentDetails={openTorrentDetails}
                                 selectedReducer={selectedReducer}
                                 mobileSelectionMode={mobileSelectionMode}
-                                enterMobileSelectionMode={enterMobileSelectionMode}
                                 onColumnVisibilityChange={setTableRequiredFields}
                                 scrollToRow={scrollToRow}
                                 setStatus={updateStatus} />}
