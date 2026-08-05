@@ -27,6 +27,7 @@ import { pathMapFromServer, pathMapToServer } from "trutil";
 import * as Icon from "react-bootstrap-icons";
 import { useServerSelectedTorrents, useServerTorrentData } from "rpc/torrent";
 import { useHotkeysContext } from "hotkeys";
+import { useIsMobile } from "../../hooks/useResponsive";
 const { TAURI, dialogOpen } = await import(/* webpackChunkName: "taurishim" */"taurishim");
 
 export interface ModalState {
@@ -36,6 +37,10 @@ export interface ModalState {
 
 export function HkModal(props: ModalProps) {
     const hk = useHotkeysContext();
+    const isMobile = useIsMobile();
+    const className = [props.className, isMobile ? "mobile-modal" : undefined]
+        .filter((name) => name !== undefined && name !== "")
+        .join(" ");
 
     useEffect(() => {
         hk.active = !props.opened;
@@ -43,7 +48,7 @@ export function HkModal(props: ModalProps) {
         return () => { hk.active = true; };
     }, [props.opened, hk]);
 
-    return <Modal {...props}>{props.children}</Modal>;
+    return <Modal {...props} className={className} fullScreen={isMobile || props.fullScreen}>{props.children}</Modal>;
 }
 
 interface SaveCancelModalProps extends ModalProps {

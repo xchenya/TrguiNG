@@ -48,6 +48,8 @@ import type { ModalCallbacks } from "components/modals/servermodals";
 import type { TorrentActionMethodsType } from "rpc/client";
 import * as Icon from "react-bootstrap-icons";
 import { useHotkeysContext } from "hotkeys";
+import { useIsMobile } from "../../hooks/useResponsive";
+import { MobileTorrentList } from "./torrentcard";
 const { TAURI, invoke, copyToClipboard } = await import(/* webpackChunkName: "taurishim" */"taurishim");
 import {RunStatus} from "../../status";
 
@@ -408,23 +410,40 @@ function getRequiredFields(visibilityState: VisibilityState): TorrentFieldsType[
     return Array.from(set).sort();
 }
 
+function getMobileRequiredFields(visibilityState: VisibilityState): TorrentFieldsType[] {
+    const fields = new Set(getRequiredFields(visibilityState));
+    ["eta", "leftUntilDone", "percentDone", "totalSize"].forEach((field) => {
+        fields.add(field as TorrentFieldsType);
+    });
+    return Array.from(fields).sort();
+}
+
 export function useInitialTorrentRequiredFields() {
     const config = useContext(ConfigContext);
+    const isMobile = useIsMobile();
 
     return useMemo(
-        () => getRequiredFields(config.getTableColumnVisibility("torrents")),
-        [config]);
+        () => {
+            const visibility = config.getTableColumnVisibility("torrents");
+            return isMobile ? getMobileRequiredFields(visibility) : getRequiredFields(visibility);
+        },
+        [config, isMobile]);
 }
 
 export function TorrentTable(props: {
     modals: React.RefObject<ModalCallbacks>,
     torrents: Torrent[],
     setCurrentTorrent: (id: string) => void,
+    openTorrentDetails: (id: string) => void,
     selectedReducer: TableSelectReducer,
+    mobileSelectionMode: boolean,
+    enterMobileSelectionMode: () => void,
     onColumnVisibilityChange: React.Dispatch<TorrentFieldsType[]>,
     scrollToRow?: { id: string },
     setStatus: (status: RunStatus) => void,
 }) {
+    const isMobile = useIsMobile();
+    const config = useContext(ConfigContext);
     const serverConfig = useContext(ServerConfigContext);
 
     const getRowId = useCallback((t: Torrent) => String(t.id), []);
@@ -434,6 +453,12 @@ export function TorrentTable(props: {
         (visibility: VisibilityState) => { onColumnVisibilityChange(getRequiredFields(visibility)); },
         [onColumnVisibilityChange],
     );
+
+    useEffect(() => {
+        if (isMobile) {
+            onColumnVisibilityChange(getMobileRequiredFields(config.getTableColumnVisibility("torrents")));
+        }
+    }, [config, isMobile, onColumnVisibilityChange]);
 
     const onRowDoubleClick = useCallback((torrent: Torrent, reveal: boolean = false) => {
         if (TAURI) {
@@ -459,28 +484,41 @@ export function TorrentTable(props: {
     const serverSelected = useServerSelectedTorrents();
     const selected = useMemo(() => Array.from(serverSelected).map(String), [serverSelected]);
 
-    const [info, setInfo, handler] = useContextMenu();
-
+    const [info, setInfo, handler, openContextMenu] = useContextMenu();
     return (
-        <Box w="100%" h="100%" onContextMenu={handler}>
+        <Box w="100%" h="100%" onContextMenu={isMobile ? undefined : handler}>
             <MemoizedTorrentContextMenu
                 contextMenuInfo={info}
                 setContextMenuInfo={setInfo}
                 modals={props.modals}
                 onRowDoubleClick={onRowDoubleClick}
-                setStatus={props.setStatus}/>
-            <TrguiTable<Torrent> {...{
-                tablename: "torrents",
-                columns: Columns,
-                data: props.torrents,
-                getRowId,
-                selected: selected,
-                selectedReducer: props.selectedReducer,
-                setCurrent: props.setCurrentTorrent,
-                onVisibilityChange,
-                onRowDoubleClick,
-                scrollToRow: props.scrollToRow,
-            }} />
+                setStatus={props.setStatus}
+                openTorrentDetails={props.openTorrentDetails}/>
+            {isMobile
+                ? <MobileTorrentList
+                    torrents={props.torrents}
+                    selected={serverSelected}
+                    selectedReducer={props.selectedReducer}
+                    setCurrentTorrent={props.setCurrentTorrent}
+                    openTorrentDetails={props.openTorrentDetails}
+                    openContextMenu={openContextMenu}
+                    selectionMode={props.mobileSelectionMode}
+                    enterSelectionMode={props.enterMobileSelectionMode}
+                    scrollToRow={props.scrollToRow}
+                />
+                : <TrguiTable<Torrent> {...{
+                    tablename: "torrents",
+                    columns: Columns,
+                    data: props.torrents,
+                    getRowId,
+                    selected: selected,
+                    selectedReducer: props.selectedReducer,
+                    setCurrent: props.setCurrentTorrent,
+                    onVisibilityChange,
+                    onRowDoubleClick,
+                    onRowLongPress: openContextMenu,
+                    scrollToRow: props.scrollToRow,
+                }} />}
         </Box>
     );
 }
@@ -491,10 +529,12 @@ function TorrentContextMenu(props: {
     modals: React.RefObject<ModalCallbacks>,
     onRowDoubleClick: (t: Torrent, reveal: boolean) => void,
     setStatus: (status: RunStatus) => void,
+    openTorrentDetails?: (id: string) => void,
 }) {
     const serverData = useServerTorrentData();
     const serverSelected = useServerSelectedTorrents();
     const rpcVersion = useServerRpcVersion();
+    const isMobile = useIsMobile();
 
     const { onRowDoubleClick } = props;
     const onOpen = useCallback((reveal: boolean) => {
@@ -527,10 +567,11 @@ function TorrentContextMenu(props: {
     const [queueItemRect, setQueueItemRect] = useState<DOMRect>(() => new DOMRect(0, -100, 0, 0));
 
     const openQueueSubmenu = useCallback(() => {
+        if (isMobile) return;
         if (queueRef.current == null || serverSelected.size === 0) return;
         setQueueItemRect(queueRef.current.getBoundingClientRect());
         setQueueSubmenuOpened(true);
-    }, [serverSelected]);
+    }, [isMobile, serverSelected]);
 
     const closeQueueSubmenu = useCallback(() => {
         setQueueSubmenuOpened(false);
@@ -597,6 +638,7 @@ function TorrentContextMenu(props: {
     }, [copyNames, hk]);
 
     const theme = useMantineTheme();
+    const currentTorrent = serverData.torrents.find((torrent) => torrent.id === serverData.current);
 
     return (<>
         <Menu
@@ -658,8 +700,39 @@ function TorrentContextMenu(props: {
                 </Menu.Dropdown>
             </Portal>
         </Menu>
-        <ContextMenu contextMenuInfo={props.contextMenuInfo} setContextMenuInfo={props.setContextMenuInfo}>
+        <ContextMenu
+            contextMenuInfo={props.contextMenuInfo}
+            setContextMenuInfo={props.setContextMenuInfo}
+        >
             <Box miw="14rem">
+                {isMobile && <>
+                    <Menu.Item
+                        onClick={() => {
+                            if (serverData.current !== undefined) props.openTorrentDetails?.(String(serverData.current));
+                        }}
+                        icon={<Icon.InfoCircleFill size="1.1rem" />}
+                        disabled={serverData.current === undefined}>
+                        查看详情
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => {
+                            torrentAction(currentTorrent?.status === Status.stopped ? "torrent-start" : "torrent-stop", currentTorrent?.status === Status.stopped ? "开始" : "暂停");
+                        }}
+                        icon={currentTorrent?.status === Status.stopped
+                            ? <Icon.PlayCircleFill size="1.1rem" />
+                            : <Icon.PauseCircleFill size="1.1rem" />}
+                        disabled={serverSelected.size === 0}>
+                        {currentTorrent?.status === Status.stopped ? "开始任务" : "暂停任务"}
+                    </Menu.Item>
+                    <Menu.Item
+                        onClick={() => props.modals.current?.remove()}
+                        icon={<Icon.XCircleFill size="1.1rem" color={theme.colors.red[6]} />}
+                        disabled={serverSelected.size === 0}>
+                        删除任务
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Text size="xs" color="dimmed" px="sm" py={4}>更多操作</Text>
+                </>}
                 {TAURI && <>
                     <Menu.Item
                         onClick={() => { onOpen(false); }}
@@ -684,31 +757,31 @@ function TorrentContextMenu(props: {
                     disabled={serverSelected.size === 0}>
                     强制开始选中的种子
                 </Menu.Item>
-                <Menu.Item
+                {!isMobile && <Menu.Item
                     onClick={() => { torrentAction("torrent-start", "开始"); }}
                     onMouseEnter={closeQueueSubmenu}
                     icon={<Icon.PlayCircleFill size="1.1rem" />}
                     rightSection={<Kbd>F3</Kbd>}
                     disabled={serverSelected.size === 0}>
                     开始选中的种子
-                </Menu.Item>
-                <Menu.Item
+                </Menu.Item>}
+                {!isMobile && <Menu.Item
                     onClick={() => { torrentAction("torrent-stop", "暂停"); }}
                     onMouseEnter={closeQueueSubmenu}
                     icon={<Icon.PauseCircleFill size="1.1rem" />}
                     rightSection={<Kbd>F4</Kbd>}
                     disabled={serverSelected.size === 0}>
                     暂停选中的种子
-                </Menu.Item>
+                </Menu.Item>}
                 <Menu.Divider />
-                <Menu.Item
+                {!isMobile && <Menu.Item
                     onClick={() => props.modals.current?.remove()}
                     onMouseEnter={closeQueueSubmenu}
                     icon={<Icon.XCircleFill size="1.1rem" color={theme.colors.red[6]} />}
                     disabled={serverSelected.size === 0}
                     rightSection={<Kbd>del</Kbd>}>
                     删除选中的任务
-                </Menu.Item>
+                </Menu.Item>}
                 <Menu.Item
                     onClick={() => { torrentAction("torrent-verify", "开始校验"); }}
                     onMouseEnter={closeQueueSubmenu}
@@ -756,13 +829,40 @@ function TorrentContextMenu(props: {
                     复制选中种子的磁力链接
                 </Menu.Item>
                 <Menu.Divider />
-                <Menu.Item ref={queueRef}
-                    icon={<Icon.ThreeDots size="1.1rem" />}
-                    rightSection={<Icon.ChevronRight size="0.8rem" />}
-                    onMouseEnter={openQueueSubmenu}
-                    disabled={serverSelected.size === 0}>
-                    队列
-                </Menu.Item>
+                {isMobile
+                    ? <>
+                        <Menu.Item
+                            onClick={() => { torrentAction("queue-move-top", "队列已更新"); }}
+                            icon={<Icon.ChevronDoubleUp size="1.1rem" />}
+                            disabled={serverSelected.size === 0}>
+                            队列排到最前
+                        </Menu.Item>
+                        <Menu.Item
+                            onClick={() => { torrentAction("queue-move-up", "队列已更新"); }}
+                            icon={<Icon.ChevronUp size="1.1rem" />}
+                            disabled={serverSelected.size === 0}>
+                            队列向上移动
+                        </Menu.Item>
+                        <Menu.Item
+                            onClick={() => { torrentAction("queue-move-down", "队列已更新"); }}
+                            icon={<Icon.ChevronDown size="1.1rem" />}
+                            disabled={serverSelected.size === 0}>
+                            队列向下移动
+                        </Menu.Item>
+                        <Menu.Item
+                            onClick={() => { torrentAction("queue-move-bottom", "队列已更新"); }}
+                            icon={<Icon.ChevronDoubleDown size="1.1rem" />}
+                            disabled={serverSelected.size === 0}>
+                            队列排到最后
+                        </Menu.Item>
+                    </>
+                    : <Menu.Item ref={queueRef}
+                        icon={<Icon.ThreeDots size="1.1rem" />}
+                        rightSection={<Icon.ChevronRight size="0.8rem" />}
+                        onMouseEnter={openQueueSubmenu}
+                        disabled={serverSelected.size === 0}>
+                        队列
+                    </Menu.Item>}
                 <Menu.Item
                     onClick={() => props.modals.current?.setLabels()}
                     onMouseEnter={closeQueueSubmenu}

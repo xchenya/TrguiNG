@@ -70,7 +70,12 @@ pub async fn lookup(app: &AppHandle, ips: Vec<IpAddr>) -> Vec<LookupResult> {
                     iso_code: country.iso_code.map(|c| c.to_string()),
                     name: country
                         .names
-                        .and_then(|names| names.get("en").map(|s| s.to_string())),
+                        .and_then(|names| {
+                            names
+                                .get("zh-CN")
+                                .or_else(|| names.get("en"))
+                                .map(|s| s.to_string())
+                        }),
                 },
                 None => LookupResult {
                     ip,

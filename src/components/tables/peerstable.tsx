@@ -24,8 +24,6 @@ import { TrguiTable, useStandardSelect } from "./common";
 import { ProgressBar } from "components/progressbar";
 import { Flex } from "@mantine/core";
 import { ConfigContext } from "config";
-const { TAURI } = await import(/* webpackChunkName: "taurishim" */"taurishim");
-if (TAURI) await import(/* webpackChunkName: "flag-icons" */"flagsshim");
 
 interface TableFieldProps {
     entry: PeerStats,
@@ -42,6 +40,7 @@ interface TableField {
 
 const AllFields: TableField[] = [
     { name: "address", label: "IP" },
+    { name: "cachedCountryName", label: "国家", columnId: "country", component: CountryField },
     { name: "port", label: "端口" },
     { name: "clientName", label: "客户端" },
     { name: "flagStr", label: "Flags" },
@@ -55,13 +54,16 @@ const AllFields: TableField[] = [
     { name: "cachedStatus", label: "状态" },
 ];
 
-if (TAURI) AllFields.splice(1, 0, { name: "cachedCountryName", label: "国家", columnId: "country", component: CountryField });
-
 function CountryField(props: TableFieldProps) {
-    const iso = props.entry.cachedCountryIso;
-    return <Flex gap="sm" style={{ width: "100%" }}>
-        {iso !== undefined && <span className={`fi fi-${iso.toLowerCase()}`} />}
-        <span>{props.entry.cachedCountryName}</span>
+    const iso = props.entry.cachedCountryIso?.toUpperCase();
+    const countryName = props.entry.cachedCountryName ?? iso ?? "";
+    const emoji = iso?.length === 2 && /^[A-Z]{2}$/.test(iso)
+        ? String.fromCodePoint(...Array.from(iso).map((character) => character.codePointAt(0) as number + 127397))
+        : "";
+
+    return <Flex gap="xs" style={{ width: "100%" }} title={props.entry.cachedCountryName}>
+        {emoji !== "" && <span aria-hidden>{emoji}</span>}
+        <span>{countryName}</span>
     </Flex>;
 }
 

@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { byteRateToHumanReadableStr, bytesToHumanReadableStr } from "../trutil";
 import * as Icon from "react-bootstrap-icons";
 import { Box, Flex, Menu } from "@mantine/core";
 import type { SessionInfo } from "rpc/client";
 import type { Torrent } from "rpc/torrent";
-import {ColorSchemeToggle, FontSizeToggle, ShowVersion} from "components/miscbuttons";
+import { ColorSchemeToggle, FontSizeToggle, ShowVersion } from "components/miscbuttons";
 import { ConfigContext, ServerConfigContext } from "config";
 import { useContextMenu } from "./contextmenu";
 import { MemoSectionsContextMenu, getSectionsMap } from "./sectionscontextmenu";
+import { useIsMobile } from "../hooks/useResponsive";
 
 const { TAURI, appWindow } = await import(/* webpackChunkName: "taurishim" */"taurishim");
 
@@ -40,6 +41,7 @@ export interface StatusbarProps {
 export function Statusbar({ session, torrents, filteredTorrents, selectedTorrents, hostname }: StatusbarProps) {
     const config = useContext(ConfigContext);
     const serverConfig = useContext(ServerConfigContext);
+    const isMobile = useIsMobile();
 
     const serverFields = useMemo(() => ({
         downRateLimit: session !== undefined
@@ -73,11 +75,16 @@ export function Statusbar({ session, torrents, filteredTorrents, selectedTorrent
     const [sections, setSections] = useState(config.values.interface.statusBarSections);
     const [sectionsMap, setSectionsMap] = useState(getSectionsMap(sections));
 
-    useEffect(() => {
-        config.values.interface.statusBarGlobalSpeeds = showGlobalSpeeds;
-        config.values.interface.statusBarSections = sections;
-        setSectionsMap(getSectionsMap(sections));
-    }, [config, showGlobalSpeeds, sections]);
+    const mobileHiddenSections = useMemo(() => new Set(["连接状态", "剩余空间", "列表总大小"]), []);
+
+    const isSectionVisible = useCallback((section: string) => {
+        const sectionData = sections[sectionsMap[section as keyof typeof sectionsMap]];
+        if (sectionData === undefined) return false;
+        if (isMobile && mobileHiddenSections.has(section)) {
+            return false;
+        }
+        return sectionData.visible;
+    }, [sections, sectionsMap, isMobile, mobileHiddenSections]);
 
     const [downRate, upRate, sizeTotal] = useMemo(() => [
         bytesToHumanReadableStr(
@@ -92,6 +99,12 @@ export function Statusbar({ session, torrents, filteredTorrents, selectedTorrent
     ], [showGlobalSpeeds, torrents, filteredTorrents]);
 
     useEffect(() => {
+        config.values.interface.statusBarGlobalSpeeds = showGlobalSpeeds;
+        config.values.interface.statusBarSections = sections;
+        setSectionsMap(getSectionsMap(sections));
+    }, [config, showGlobalSpeeds, sections]);
+
+    useEffect(() => {
         const speeds = `↓${downRate}/s ↑${upRate}/s`;
         document.title = `${speeds} - TrguiNG`;
         if (TAURI) {
@@ -101,55 +114,85 @@ export function Statusbar({ session, torrents, filteredTorrents, selectedTorrent
 
     const [info, setInfo, handler] = useContextMenu();
 
+    const sectionsContextMenu = <MemoSectionsContextMenu
+        sections={sections} setSections={setSections}
+        contextMenuInfo={info} setContextMenuInfo={setInfo}>
+        <Menu.Divider />
+        <Menu.Item
+            icon={showGlobalSpeeds ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+            onMouseDown={(e) => {
+                e.stopPropagation();
+                setShowGlobalSpeeds(!showGlobalSpeeds);
+            }}
+        >
+            显示全局速度
+        </Menu.Item>
+    </MemoSectionsContextMenu>;
+
+    const statusbarTools = <Flex className="mobile-statusbar-tools" sx={{ flex: "0 0 auto" }}>
+        <ColorSchemeToggle sz="0.9rem" btn="md" />
+        <FontSizeToggle sz="0.9rem" btn="md" />
+        <ShowVersion sz="0.9rem" btn="md" />
+    </Flex>;
+
+    if (isMobile) {
+        return (
+            <Flex className="statusbar mobile-statusbar" direction="column" onContextMenu={handler}>
+                {sectionsContextMenu}
+                <Flex className="mobile-statusbar-row" align="center">
+                    {isSectionVisible("下载速度") &&
+                        <Flex className="mobile-statusbar-speed" align="center" title={`${downRate}/s (${byteRateToHumanReadableStr(serverFields.downRateLimit * 1024)})`}>
+                            <Box component="span" mr="xs">{showGlobalSpeeds && <Icon.Globe />}<Icon.ArrowDown /></Box>
+                            <span>{`${downRate}/s (${byteRateToHumanReadableStr(serverFields.downRateLimit * 1024)})`}</span>
+                        </Flex>}
+                    {isSectionVisible("上传速度") &&
+                        <Flex className="mobile-statusbar-speed" align="center" title={`${upRate}/s (${byteRateToHumanReadableStr(serverFields.upRateLimit * 1024)})`}>
+                            <Box component="span" mr="xs">{showGlobalSpeeds && <Icon.Globe />}<Icon.ArrowUp /></Box>
+                            <span>{`${upRate}/s (${byteRateToHumanReadableStr(serverFields.upRateLimit * 1024)})`}</span>
+                        </Flex>}
+                </Flex>
+                <Flex className="mobile-statusbar-row" align="center">
+                    <Box className="mobile-statusbar-selection" title={`选中大小: ${sizeSelected}, 完成 ${sizeDone}, 剩余 ${sizeLeft}`}>
+                        {isSectionVisible("选中大小") && `选中大小: ${sizeSelected}, 完成 ${sizeDone}, 剩余 ${sizeLeft}`}
+                    </Box>
+                    {statusbarTools}
+                </Flex>
+            </Flex>
+        );
+    }
+
     return (
         <Flex className="statusbar" sx={{ flexWrap: "nowrap" }} onContextMenu={handler} gap="md">
-            <MemoSectionsContextMenu
-                sections={sections} setSections={setSections}
-                contextMenuInfo={info} setContextMenuInfo={setInfo}>
-                <Menu.Divider/>
-                <Menu.Item
-                    icon={showGlobalSpeeds ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
-                    onMouseDown={(e) => {
-                        e.stopPropagation();
-                        setShowGlobalSpeeds(!showGlobalSpeeds);
-                    }}
-                >
-                    显示全局速度
-                </Menu.Item>
-            </MemoSectionsContextMenu>
-            {sections[sectionsMap["连接状态"]].visible &&
+            {sectionsContextMenu}
+            {isSectionVisible("连接状态") &&
                 <div style={{ flex: "1 1 20%", order: sectionsMap["连接状态"] }}>
                     <Box component="span" my="auto" mr="xs"><Icon.Diagram2 /></Box>
                     <span>{`${session?.version as string ?? "<未连接>"} at ${hostname}`}</span>
                 </div>}
-            {sections[sectionsMap["下载速度"]].visible &&
+            {isSectionVisible("下载速度") &&
                 <div style={{ flex: "1 1 10%", order: sectionsMap["下载速度"] }}>
                     <Box component="span" my="auto" mr="xs">{showGlobalSpeeds && <Icon.Globe />}<Icon.ArrowDown /></Box>
                     <span>{`${downRate}/s (${byteRateToHumanReadableStr(serverFields.downRateLimit * 1024)})`}</span>
                 </div>}
-            {sections[sectionsMap["上传速度"]].visible &&
+            {isSectionVisible("上传速度") &&
                 <div style={{ flex: "1 1 15%", order: sectionsMap["上传速度"] }}>
                     <Box component="span" my="auto" mr="xs">{showGlobalSpeeds && <Icon.Globe />}<Icon.ArrowUp /></Box>
                     <span>{`${upRate}/s (${byteRateToHumanReadableStr(serverFields.upRateLimit * 1024)})`}</span>
                 </div>}
-            {sections[sectionsMap["剩余空间"]].visible &&
+            {isSectionVisible("剩余空间") &&
                 <div style={{ flex: "1 1 12%", order: sectionsMap["剩余空间"] }}>
                     <Box component="span" my="auto" mr="xs"><Icon.Hdd /></Box>
                     <span>{`剩余空间: ${bytesToHumanReadableStr(serverFields.free)}`}</span>
                 </div>}
-            {sections[sectionsMap["列表总大小"]].visible &&
+            {isSectionVisible("列表总大小") &&
                 <div style={{ flex: "1 1 12%", order: sectionsMap["列表总大小"] }}>
                     {`列表总大小: ${sizeTotal}`}
                 </div>}
-            {sections[sectionsMap["选中大小"]].visible &&
+            {isSectionVisible("选中大小") &&
                 <div style={{ flex: "1 1 20%", order: sectionsMap["选中大小"] }}>
                     {`选中大小: ${sizeSelected}, 完成 ${sizeDone}, 剩余 ${sizeLeft}`}
                 </div>}
-            <div style={{ flexShrink: 0, display: "flex", order: 100 }}>
-                <ColorSchemeToggle sz="0.9rem" btn="md" />
-                <FontSizeToggle sz="0.9rem" btn="md" />
-                <ShowVersion sz="0.9rem" btn="md" />
-            </div>
+            <div style={{ flexShrink: 0, display: "flex", order: 100 }}>{statusbarTools}</div>
         </Flex>
     );
 }

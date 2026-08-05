@@ -21,6 +21,7 @@ import type { SplitType } from "config";
 import { ConfigContext } from "config";
 import React, { useCallback, useContext } from "react";
 import Split from "react-split";
+import { useIsMobile } from "../hooks/useResponsive";
 
 interface SplitLayoutProps {
     mainSplit: SplitType,
@@ -33,6 +34,7 @@ interface SplitLayoutProps {
 // Depending on mainSplit it may actually be "left", "midle", "right".
 export function SplitLayout({ mainSplit, left, right, bottom }: SplitLayoutProps) {
     const config = useContext(ConfigContext);
+    const isMobile = useIsMobile();
 
     const onVerticalDragEnd = useCallback((sizes: [number, number]) => {
         config.setSashSizes("vertical", sizes);
@@ -40,6 +42,10 @@ export function SplitLayout({ mainSplit, left, right, bottom }: SplitLayoutProps
     const onHorizontalDragEnd = useCallback((sizes: [number, number]) => {
         config.setSashSizes("horizontal", sizes);
     }, [config]);
+
+    if (isMobile) {
+        return <Box h="100%">{right}</Box>;
+    }
 
     const top = left === undefined
         ? right

@@ -19,6 +19,7 @@
 import type { MenuProps, PortalProps } from "@mantine/core";
 import { Button, Menu, Portal, ScrollArea } from "@mantine/core";
 import React, { useCallback, useEffect, useState } from "react";
+import { useIsMobile } from "../hooks/useResponsive";
 
 export interface ContextMenuInfo {
     x: number,
@@ -26,16 +27,27 @@ export interface ContextMenuInfo {
     opened: boolean,
 }
 
-export function useContextMenu(): [ContextMenuInfo, React.Dispatch<ContextMenuInfo>, React.MouseEventHandler<HTMLElement>] {
+type ContextMenuHook = [
+    ContextMenuInfo,
+    React.Dispatch<ContextMenuInfo>,
+    React.MouseEventHandler<HTMLElement>,
+    (x: number, y: number) => void,
+];
+
+export function useContextMenu(): ContextMenuHook {
     const [info, setInfo] = useState<ContextMenuInfo>({ x: 0, y: 0, opened: false });
+
+    const openContextMenu = useCallback((x: number, y: number) => {
+        setInfo({ x, y, opened: true });
+    }, [setInfo]);
 
     const contextMenuHandler = useCallback<React.MouseEventHandler<HTMLElement>>((e) => {
         e.preventDefault();
         e.stopPropagation();
-        setInfo({ x: e.clientX, y: e.clientY, opened: true });
-    }, [setInfo]);
+        openContextMenu(e.clientX, e.clientY);
+    }, [openContextMenu]);
 
-    return [info, setInfo, contextMenuHandler];
+    return [info, setInfo, contextMenuHandler, openContextMenu];
 }
 
 export interface ContextMenuProps extends MenuProps {
@@ -43,6 +55,7 @@ export interface ContextMenuProps extends MenuProps {
     containerRef?: PortalProps["innerRef"],
     closeOnClickOutside?: boolean,
     setContextMenuInfo: (i: ContextMenuInfo) => void,
+    onDismiss?: () => void,
 }
 
 export function ContextMenu({
@@ -50,12 +63,18 @@ export function ContextMenu({
     containerRef,
     closeOnClickOutside = true,
     setContextMenuInfo,
+    onDismiss,
     children,
     ...other
 }: ContextMenuProps) {
+    const isMobile = useIsMobile();
+
     const onClose = useCallback(
-        () => { setContextMenuInfo({ ...contextMenuInfo, opened: false }); },
-        [contextMenuInfo, setContextMenuInfo]);
+        () => {
+            setContextMenuInfo({ ...contextMenuInfo, opened: false });
+            onDismiss?.();
+        },
+        [contextMenuInfo, onDismiss, setContextMenuInfo]);
 
     const [opened, setOpened] = useState<boolean>(false);
 
@@ -65,9 +84,9 @@ export function ContextMenu({
         <Menu {...other}
             opened={opened}
             onClose={onClose}
-            offset={0}
+            offset={isMobile ? 8 : 0}
             middlewares={{ shift: true, flip: true }}
-            position="right-start"
+            position={isMobile ? "top" : "right-start"}
             closeOnClickOutside={closeOnClickOutside}
         >
             <Portal innerRef={containerRef}>
@@ -81,14 +100,38 @@ export function ContextMenu({
                             border: 0,
                         }}
                         style={{
-                            left: contextMenuInfo.x,
-                            top: contextMenuInfo.y,
+                            left: isMobile ? 0 : contextMenuInfo.x,
+                            top: isMobile ? 0 : contextMenuInfo.y,
                         }} />
                 </Menu.Target>
-                <Menu.Dropdown>
+                <Menu.Dropdown
+                    sx={isMobile
+                        ? (theme) => ({
+                            position: "fixed",
+                            left: "0.5rem !important",
+                            right: "0.5rem !important",
+                            bottom: 0,
+                            top: "auto !important",
+                            width: "calc(100vw - 1rem)",
+                            maxWidth: "32rem",
+                            marginInline: "auto",
+                            borderRadius: `${theme.radius.lg} ${theme.radius.lg} 0 0`,
+                            boxShadow: theme.shadows.xl,
+                            padding: theme.spacing.xs,
+                            "& .mantine-Menu-item": {
+                                minHeight: "44px",
+                                padding: theme.spacing.md,
+                                borderRadius: theme.radius.md,
+                            },
+                            "& .mantine-Kbd-root": {
+                                display: "none",
+                            },
+                        })
+                        : undefined}
+                >
                     <ScrollArea.Autosize
                         type="auto"
-                        mah="calc(100vh - 0.5rem)"
+                        mah={isMobile ? "70vh" : "calc(100vh - 0.5rem)"}
                         offsetScrollbars
                         styles={{ viewport: { paddingBottom: 0 } }}
                     >

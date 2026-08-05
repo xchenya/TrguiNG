@@ -37,6 +37,7 @@ import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "components/strictmodedroppable";
 import { eventHasModKey, reorderElements } from "trutil";
 import { useFontSize } from "themehooks";
+import { useIsMobile } from "../../hooks/useResponsive";
 
 const defaultColumn = {
     minSize: 30,
@@ -318,6 +319,7 @@ function TableRow<TData>(props: {
     start: number,
     lastIndex: number,
     onRowClick: (e: HIDEvent, i: number, li: number) => void,
+    onRowLongPress?: (x: number, y: number) => void,
     onRowDoubleClick?: (row: TData) => void,
     height: number,
     columnSizing: ColumnSizingState,
@@ -331,15 +333,57 @@ function TableRow<TData>(props: {
         }
     }, [propsDblClick, row.original]);
 
-    const { onRowClick, index, lastIndex } = props;
+    const { onRowClick, onRowLongPress, index, lastIndex } = props;
+    const isMobile = useIsMobile();
+    const longPressTimer = useRef<number>();
+    const longPressTriggered = useRef(false);
 
     const onMouseEvent = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (longPressTriggered.current && e.type === "click") {
+            longPressTriggered.current = false;
+            return;
+        }
         onRowClick({
             modKey: eventHasModKey(e),
             shiftKey: e.shiftKey,
             isRmb: e.button === 2,
         }, index, lastIndex);
     }, [index, lastIndex, onRowClick]);
+
+    const clearLongPressTimer = useCallback(() => {
+        if (longPressTimer.current !== undefined) {
+            window.clearTimeout(longPressTimer.current);
+            longPressTimer.current = undefined;
+        }
+    }, []);
+
+    const onTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+        if (!isMobile || onRowLongPress === undefined || e.touches.length !== 1) return;
+
+        const touch = e.touches[0];
+        clearLongPressTimer();
+        longPressTriggered.current = false;
+        longPressTimer.current = window.setTimeout(() => {
+            longPressTimer.current = undefined;
+            longPressTriggered.current = true;
+            onRowClick({
+                modKey: false,
+                shiftKey: false,
+                isRmb: true,
+            }, index, lastIndex);
+            onRowLongPress(touch.clientX, touch.clientY);
+        }, 500);
+    }, [clearLongPressTimer, index, isMobile, lastIndex, onRowClick, onRowLongPress]);
+
+    const onTouchEnd = useCallback(() => {
+        clearLongPressTimer();
+    }, [clearLongPressTimer]);
+
+    const onTouchMove = useCallback(() => {
+        clearLongPressTimer();
+    }, [clearLongPressTimer]);
+
+    useEffect(() => clearLongPressTimer, [clearLongPressTimer]);
 
     const ref = useRef<HTMLDivElement>(null);
 
@@ -374,12 +418,16 @@ function TableRow<TData>(props: {
 
     return (
         <div ref={ref}
-            className={`tr${props.selected ? " selected" : props.descendantSelected ? " descendant-selected" : ""}`}
+            className={`tr${isMobile ? " touch-context-row" : ""}${props.selected ? " selected" : props.descendantSelected ? " descendant-selected" : ""}`}
             style={{ height: `${props.height}px`, transform: `translateY(${props.start}px)` }}
             onClick={onMouseEvent}
             onContextMenu={onMouseEvent}
             onDoubleClick={onRowDoubleClick}
             onKeyDown={onKeyDown}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            onTouchMove={onTouchMove}
+            onTouchCancel={onTouchEnd}
             tabIndex={-1}
         >
             <RowSelectedContext.Provider value={props.selected}>
@@ -519,6 +567,7 @@ export function TrguiTable<TData>(props: {
     selectedReducer: TableSelectReducer,
     setCurrent?: (id: string) => void,
     onRowDoubleClick?: (row: TData) => void,
+    onRowLongPress?: (x: number, y: number) => void,
     onVisibilityChange?: React.Dispatch<VisibilityState>,
     scrollToRow?: { id: string },
 }) {
@@ -596,6 +645,7 @@ export function TrguiTable<TData>(props: {
                                 start: virtualRow.start,
                                 onRowClick,
                                 onRowDoubleClick: props.onRowDoubleClick,
+                                onRowLongPress: props.onRowLongPress,
                                 height: rowHeight,
                                 columnSizing,
                                 columnVisibility,

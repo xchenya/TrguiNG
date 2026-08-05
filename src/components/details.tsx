@@ -77,10 +77,10 @@ function DetailItem({ name, children }: DetailItemProps) {
             borderBottom: "1px solid",
             borderColor: theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[3],
             padding: "1px 0.4em 0 0.4em",
-            lineHeight: 1.4
+            lineHeight: 1.4,
         }}>
             <Flex>
-                <Box sx={{ flex: "0 0 7em" }}><span style={{float: "right", marginRight: "0.4em"}}>{name}</span></Box>
+                <Box sx={{ flex: "0 0 7em" }}><span style={{ float: "right", marginRight: "0.4em" }}>{name}</span></Box>
                 {children}
             </Flex>
         </Grid.Col>
@@ -277,7 +277,7 @@ function GeneralPane(props: { torrent: Torrent }) {
             <Container fluid mx={0}>
                 <DownloadBar {...props} />
             </Container>
-            <div style={{ flexGrow: 1 }}>
+            <div style={{ flexGrow: 1, minHeight: 0 }}>
                 <div className="scrollable">
                     <Container fluid>
                         <TableNameRow>传输信息</TableNameRow>
@@ -365,7 +365,7 @@ function ServerStats() {
 
     return (
         <Flex direction="column" h="100%" w="100%">
-            <div style={{ flexGrow: 1 }}>
+            <div style={{ flexGrow: 1, minHeight: 0 }}>
                 <div className="scrollable">
                     {sessionStats !== undefined
                         ? <Container fluid>
@@ -508,7 +508,7 @@ function Details(props: DetailsProps) {
                         </Group>
                     </Tabs.Tab>}
             </Tabs.List>
-            <div style={{ flexGrow: 1, position: "relative" }}>
+            <div style={{ flexGrow: 1, minHeight: 0, position: "relative" }}>
                 <LoadingOverlay
                     visible={props.torrentId !== undefined && isLoading} transitionDuration={500}
                     loaderProps={{ size: "xl" }}

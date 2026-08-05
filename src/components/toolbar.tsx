@@ -17,22 +17,23 @@
  */
 
 import type { MantineTheme } from "@mantine/core";
-import {ActionIcon, Button, Flex, Grid, Kbd, Menu, NativeSelect, TextInput, useMantineTheme} from "@mantine/core";
+import { ActionIcon, Box, Button, Drawer, Flex, Kbd, Menu, NativeSelect, SegmentedControl, Text, TextInput, useMantineTheme } from "@mantine/core";
 import debounce from "lodash-es/debounce";
 import React, { forwardRef, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Icon from "react-bootstrap-icons";
 import PriorityIcon from "svg/icons/priority.svg";
 import type { PriorityNumberType } from "rpc/transmission";
-import {BandwidthPriority, Status} from "rpc/transmission";
+import { BandwidthPriority, Status } from "rpc/transmission";
 import { useTorrentAction, useMutateSession, useMutateTorrent } from "queries";
 import { notifications } from "@mantine/notifications";
 import type { TorrentActionMethodsType } from "rpc/client";
 import type { ModalCallbacks } from "./modals/servermodals";
 import type { HotkeyHandlers } from "hotkeys";
 import { useHotkeysContext } from "hotkeys";
-import { useHotkeys } from "@mantine/hooks";
-import {bytesToHumanReadableStr, modKeyString} from "trutil";
-import {useServerSelectedTorrents, useServerTorrentData} from "rpc/torrent";
+import { useDisclosure, useHotkeys } from "@mantine/hooks";
+import { bytesToHumanReadableStr, modKeyString } from "trutil";
+import { useServerSelectedTorrents, useServerTorrentData } from "rpc/torrent";
+import { useIsMobile } from "../hooks/useResponsive";
 
 interface ToolbarButtonProps extends React.PropsWithChildren<React.ComponentPropsWithRef<"button">> {
     depressed?: boolean,
@@ -65,13 +66,20 @@ interface ToolbarProps {
     searchTracker: string,
     setSearchTracker: (tracker: string) => void,
     showTrackerSpeed: boolean,
-    trackers: Record<string, {count: number, speed: number}>,
+    trackers: Record<string, { count: number, speed: number }>,
     modals: React.RefObject<ModalCallbacks>,
     altSpeedMode: boolean,
     toggleFiltersPanel: () => void,
     toggleDetailsPanel: () => void,
     toggleMainSplit: () => void,
     toggleShowRunStatus: () => void,
+    openFiltersDrawer: () => void,
+    mobileSelectionMode: boolean,
+    enterMobileSelectionMode: () => void,
+    exitMobileSelectionMode: () => void,
+    selectAllMobileTorrents: () => void,
+    mobileStatusFilter: string,
+    setMobileStatusFilter: (filter: string) => void,
 }
 
 function useButtonHandlers(
@@ -90,23 +98,23 @@ function useButtonHandlers(
                 if (serverSelected.size > 0) action?.();
             };
         };
-        type ActionType = 'selected' | 'all' | 'done' | 'error' | 'download';
-        const action = (method: TorrentActionMethodsType, t: ActionType = 'selected') => () => {
-            let ids = new Array<number>;
-            if (t === 'selected') {
-                ids = Array.from(serverSelected)
-            } else if (t === 'all') {
-                if (method === 'torrent-start' || method === 'torrent-start-now') {
+        type ActionType = "selected" | "all" | "done" | "error" | "download";
+        const action = (method: TorrentActionMethodsType, t: ActionType = "selected") => () => {
+            let ids = new Array<number>();
+            if (t === "selected") {
+                ids = Array.from(serverSelected);
+            } else if (t === "all") {
+                if (method === "torrent-start" || method === "torrent-start-now") {
                     ids = serverData.torrents.filter((t) => t.status === Status.stopped).map((t) => t.id as number);
-                } else if (method === 'torrent-stop') {
+                } else if (method === "torrent-stop") {
                     ids = serverData.torrents.filter((t) => t.status !== Status.stopped).map((t) => t.id as number);
                 }
-            } else if (t === 'done') {
+            } else if (t === "done") {
                 ids = serverData.torrents.filter((t) => t.status === Status.stopped &&
                     (t.sizeWhenDone > 0 && Math.max(t.sizeWhenDone - t.haveValid, 0) === 0)).map((t) => t.id as number);
-            } else if (t === 'error') {
+            } else if (t === "error") {
                 ids = serverData.torrents.filter((t) => t.error !== 0 || t.cachedError !== "").map((t) => t.id as number);
-            } else if (t === 'download') {
+            } else if (t === "download") {
                 ids = serverData.torrents.filter((t) => t.status === Status.downloading).map((t) => t.id as number);
             }
             actionMutate(
@@ -201,7 +209,162 @@ function useButtonHandlers(
     };
 }
 
-function Toolbar(props: ToolbarProps) {
+function MobileToolbar(props: ToolbarProps) {
+    const theme = useMantineTheme();
+    const [altSpeedMode, setAltSpeedMode] = useState<boolean | undefined>(props.altSpeedMode);
+    const handlers = useButtonHandlers(props, altSpeedMode, setAltSpeedMode);
+    const searchRef = useRef<HTMLInputElement>(null);
+    const serverSelected = useServerSelectedTorrents();
+    const selected = useMemo(() => serverSelected?.size > 0, [serverSelected]);
+    const [addDrawerOpened, { open: openAddDrawer, close: closeAddDrawer }] = useDisclosure(false);
+
+    const debouncedSetSearchTerms = useMemo(
+        () => debounce(props.setSearchTerms, 500, { trailing: true, leading: false }),
+        [props.setSearchTerms]);
+
+    useEffect(() => {
+        setAltSpeedMode(props.altSpeedMode);
+    }, [props.altSpeedMode]);
+
+    useEffect(() => {
+        return () => { debouncedSetSearchTerms.cancel(); };
+    }, [debouncedSetSearchTerms]);
+
+    const onSearchInput = useCallback((e: React.FormEvent) => {
+        debouncedSetSearchTerms(
+            (e.target as HTMLInputElement).value
+                .split(" ")
+                .map((s) => s.trim().toLowerCase())
+                .filter((s) => s !== ""));
+    }, [debouncedSetSearchTerms]);
+
+    const onSearchClear = useCallback(() => {
+        debouncedSetSearchTerms.cancel();
+        if (searchRef.current != null) searchRef.current.value = "";
+        props.setSearchTerms([]);
+    }, [debouncedSetSearchTerms, props]);
+
+    return (
+        <Flex direction="column" w="100%">
+            {props.mobileSelectionMode
+                ? <Flex w="100%" align="center" justify="space-between" gap="xs" p="xs">
+                    <Button variant="subtle" compact onClick={props.exitMobileSelectionMode}>取消</Button>
+                    <Text weight={600}>已选 {serverSelected.size} 项</Text>
+                    <Button variant="subtle" compact onClick={props.selectAllMobileTorrents}>全选</Button>
+                </Flex>
+                : <>
+                    <Flex w="100%" align="center" gap="xs" p="xs" pb={4}>
+                        <ActionIcon variant="default" size="lg" onClick={props.openFiltersDrawer} title="高级筛选">
+                            <Icon.Funnel size="1.1rem" />
+                        </ActionIcon>
+                        <TextInput
+                            ref={searchRef}
+                            placeholder="搜索种子"
+                            icon={<Icon.Search size="1rem" />}
+                            rightSection={<ActionIcon onClick={onSearchClear} title="清除搜索">
+                                <Icon.XLg size="1rem" color={theme.colors.red[6]} />
+                            </ActionIcon>}
+                            onInput={onSearchInput}
+                            sx={{ flexGrow: 1 }}
+                            styles={{ input: { height: "2.5rem", borderRadius: theme.radius.md } }}
+                        />
+                        <Button variant="subtle" compact onClick={props.enterMobileSelectionMode}>选择</Button>
+                    </Flex>
+                    <SegmentedControl
+                        mx="xs"
+                        mb="xs"
+                        fullWidth
+                        value={props.mobileStatusFilter}
+                        onChange={props.setMobileStatusFilter}
+                        data={["全部", "下载中", "已完成", "错误"]}
+                    />
+                </>}
+            {props.mobileSelectionMode && <Box
+                sx={{
+                    position: "fixed",
+                    bottom: "var(--mobile-statusbar-height)",
+                    left: 0,
+                    right: 0,
+                    zIndex: 100,
+                    backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
+                    borderTop: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[3]}`,
+                }}
+            >
+                <Flex justify="space-around" align="center" p="xs">
+                    <ActionIcon variant="subtle" size="lg" disabled={!selected} onClick={handlers.start}>
+                        <Icon.PlayCircleFill size="1.5rem" color={!selected ? theme.colors.gray[5] : theme.colors.blue[6]} />
+                    </ActionIcon>
+                    <ActionIcon variant="subtle" size="lg" disabled={!selected} onClick={handlers.pause}>
+                        <Icon.PauseCircleFill size="1.5rem" color={!selected ? theme.colors.gray[5] : theme.colors.blue[6]} />
+                    </ActionIcon>
+                    <ActionIcon variant="subtle" size="lg" disabled={!selected} onClick={handlers.remove}>
+                        <Icon.XCircleFill size="1.5rem" color={!selected ? theme.colors.gray[5] : theme.colors.red[6]} />
+                    </ActionIcon>
+                    <Menu shadow="md" width="12rem" withinPortal position="top-end">
+                        <Menu.Target>
+                            <ActionIcon variant="subtle" size="lg">
+                                <Icon.ThreeDots size="1.5rem" />
+                            </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                            <Menu.Item icon={<Icon.PlusSquare size="1rem" />} onClick={() => props.modals.current?.addMagnet()}>
+                                添加种子链接
+                            </Menu.Item>
+                            <Menu.Item icon={<Icon.ArrowUpCircleFill size="1rem" />} disabled={!selected} onClick={handlers.queueUp}>
+                                队列上移
+                            </Menu.Item>
+                            <Menu.Item icon={<Icon.ArrowDownCircleFill size="1rem" />} disabled={!selected} onClick={handlers.queueDown}>
+                                队列下移
+                            </Menu.Item>
+                            <Menu.Item icon={<Icon.FolderFill size="1rem" />} disabled={!selected} onClick={handlers.move}>
+                                修改目录
+                            </Menu.Item>
+                            <Menu.Item icon={<Icon.TagsFill size="1rem" />} disabled={!selected} onClick={handlers.setLabels}>
+                                设置标签
+                            </Menu.Item>
+                            <Menu.Item icon={<Icon.InfoCircleFill size="1rem" />} disabled={serverSelected.size !== 1} onClick={props.toggleDetailsPanel}>
+                                种子详情
+                            </Menu.Item>
+                            <Menu.Divider />
+                            <Menu.Item icon={<Icon.Speedometer2 size="1rem" />} onClick={handlers.toggleAltSpeedMode}>
+                                切换备用带宽
+                            </Menu.Item>
+                            <Menu.Item icon={<Icon.Tools size="1rem" />} onClick={handlers.daemonSettings}>
+                                设置
+                            </Menu.Item>
+                        </Menu.Dropdown>
+                    </Menu>
+                </Flex>
+            </Box>}
+            {!props.mobileSelectionMode && <ActionIcon
+                className="mobile-add-fab"
+                variant="filled"
+                color="blue"
+                size="3.5rem"
+                radius="xl"
+                onClick={openAddDrawer}
+                title="添加种子"
+                sx={{ position: "fixed", right: "1rem", bottom: "calc(var(--mobile-statusbar-height) + 0.75rem)", zIndex: 100 }}
+            >
+                <Icon.PlusLg size="1.5rem" />
+            </ActionIcon>}
+            <Drawer opened={addDrawerOpened} onClose={closeAddDrawer} position="bottom" size="auto" title="添加种子">
+                <Flex direction="column" gap="sm" pb="md">
+                    <Button leftIcon={<Icon.MagnetFill />} size="lg" variant="light" onClick={() => {
+                        closeAddDrawer();
+                        props.modals.current?.addMagnet();
+                    }}>添加种子链接</Button>
+                    <Button leftIcon={<Icon.FileArrowDownFill />} size="lg" variant="light" onClick={() => {
+                        closeAddDrawer();
+                        props.modals.current?.addTorrent();
+                    }}>上传种子文件</Button>
+                </Flex>
+            </Drawer>
+        </Flex>
+    );
+}
+
+function DesktopToolbar(props: ToolbarProps) {
     const debouncedSetSearchTerms = useMemo(
         () => debounce(props.setSearchTerms, 500, { trailing: true, leading: false }),
         [props.setSearchTerms]);
@@ -220,25 +383,25 @@ function Toolbar(props: ToolbarProps) {
                 .filter((s) => s !== ""));
     }, [debouncedSetSearchTerms]);
 
-    const trackersData = useMemo(()=>{
+    const trackersData = useMemo(() => {
         if (props.showTrackerSpeed) {
             let totalSpeed = 0;
             const values = Object.keys(props.trackers).sort().map((tracker) => {
                 const node = props.trackers[tracker];
                 totalSpeed += node.speed;
-                return {value: tracker, label: tracker +  " (" + node.count + ") " + `[${bytesToHumanReadableStr(node.speed)}/s]`}
+                return { value: tracker, label: `${tracker} (${node.count}) [${bytesToHumanReadableStr(node.speed)}/s]` };
             });
-            return [{value: "", label: "<All Trackers> " + `[${bytesToHumanReadableStr(totalSpeed)}/s]`}, ...values]
+            return [{ value: "", label: "<All Trackers> " + `[${bytesToHumanReadableStr(totalSpeed)}/s]` }, ...values];
         } else {
             const values = Object.keys(props.trackers).sort().map((tracker) => {
-                return {value: tracker, label: tracker +  " (" + props.trackers[tracker].count + ")"}
+                return { value: tracker, label: `${tracker} (${props.trackers[tracker].count})` };
             });
-            return [{value: "", label: "<All Trackers>"}, ...values]
+            return [{ value: "", label: "<All Trackers>" }, ...values];
         }
-    }, [props.showTrackerSpeed, props.trackers])
+    }, [props.showTrackerSpeed, props.trackers]);
 
     const onTackerChange = useCallback((tracker: string) => {
-        if (tracker == "") {
+        if (tracker === "") {
             props.setSearchTracker("");
         } else {
             props.setSearchTracker(tracker);
@@ -270,7 +433,7 @@ function Toolbar(props: ToolbarProps) {
     ]);
 
     const serverSelected = useServerSelectedTorrents();
-    const selected = useMemo(()=> {
+    const selected = useMemo(() => {
         return serverSelected?.size > 0;
     }, [serverSelected]);
 
@@ -456,6 +619,14 @@ function Toolbar(props: ToolbarProps) {
             </ToolbarButton>
         </Flex>
     );
+}
+
+function Toolbar(props: ToolbarProps) {
+    const isMobile = useIsMobile();
+
+    return isMobile
+        ? <MobileToolbar {...props} />
+        : <DesktopToolbar {...props} />;
 }
 
 export const MemoizedToolbar = memo(Toolbar) as typeof Toolbar;

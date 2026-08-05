@@ -22,6 +22,7 @@ import { readFile, writeFile, mkdir } from "fs/promises";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import CopyPlugin from "copy-webpack-plugin";
+import webpack from "webpack";
 import * as url from "url";
 
 export const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
@@ -71,7 +72,11 @@ export default (mode) => ({
             patterns: [
                 { from: "./src-tauri/icons/32x32.png", to: "favicon.png" },
                 { from: "./src-tauri/icons/128x128.png", to: "favicon128.png" },
+                { from: "./src-tauri/dbip.mmdb.gz", to: "dbip.mmdb.gz", noErrorOnMissing: true },
             ],
+        }),
+        new webpack.ProvidePlugin({
+            Buffer: ["buffer", "Buffer"],
         }),
     ],
     output: {
@@ -156,12 +161,6 @@ export default (mode) => ({
                 icons: {
                     test: /[\\/]node_modules[\\/]react-bootstrap-icons[\\/]/,
                     name: "vendors/bootstrap-icons",
-                },
-                flags: {
-                    test: /[\\/]node_modules[\\/]flag-icons[\\/]/,
-                    name: "vendors/flag-icons",
-                    reuseExistingChunk: false,
-                    enforce: true,
                 },
                 // other: {
                 //     test: /[\\/]node_modules[\\/]/,

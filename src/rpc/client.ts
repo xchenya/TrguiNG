@@ -26,6 +26,7 @@ import React, { useContext } from "react";
 import type { Batcher } from "@yornaath/batshit";
 import { create, keyResolver } from "@yornaath/batshit";
 import { mergeTrackerLists } from "trutil";
+const { TAURI } = await import(/* webpackChunkName: "taurishim" */"taurishim");
 
 const RUST_BACKEND = "http://127.0.0.1:44321";
 
@@ -399,6 +400,11 @@ export class TransmissionClient {
     }
 
     async lookupIps(ips: string[]) {
+        if (!TAURI) {
+            const browserGeoIp = await import(/* webpackChunkName: "browsergeoip" */"./browsergeoip");
+            return await browserGeoIp.lookupIps(ips);
+        }
+
         const url = `${RUST_BACKEND}/iplookup`;
         const body = JSON.stringify(ips);
 

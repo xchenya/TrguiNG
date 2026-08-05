@@ -24,6 +24,10 @@ body {
     font-size: 0.9em;
 }
 
+:root {
+    --mobile-statusbar-height: 4.5rem;
+}
+
 svg,
 img {
     vertical-align: middle;
@@ -83,6 +87,59 @@ svg:not(:root) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .mobile-statusbar {
+        height: var(--mobile-statusbar-height);
+        width: 100%;
+    }
+
+    .mobile-statusbar > .mobile-statusbar-row {
+        flex: 1 1 50%;
+        min-height: 0;
+        overflow: visible;
+        width: 100%;
+    }
+
+    .mobile-statusbar-speed {
+        flex: 1 1 50%;
+        min-width: 0;
+        padding-inline: 0.25rem;
+    }
+
+    .mobile-statusbar-speed > span:last-child,
+    .mobile-statusbar-selection {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mobile-statusbar-selection {
+        flex: 1 1 auto;
+        padding-inline: 0.25rem;
+    }
+
+    .mobile-statusbar-tools {
+        flex-shrink: 0;
+    }
+
+    .mobile-modal .mantine-CloseButton-root,
+    .mantine-Drawer-root .mantine-CloseButton-root,
+    .mantine-Modal-root .mantine-CloseButton-root {
+        height: 44px;
+        min-height: 44px;
+        min-width: 44px;
+        width: 44px;
+    }
+
+    .mobile-modal .mantine-CloseButton-root svg,
+    .mantine-Drawer-root .mantine-CloseButton-root svg,
+    .mantine-Modal-root .mantine-CloseButton-root svg {
+        height: 1.375rem !important;
+        width: 1.375rem !important;
+    }
 }
 
 .filters>* {

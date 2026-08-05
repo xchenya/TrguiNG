@@ -90,7 +90,7 @@ export function useTorrentList(enabled: boolean, fields: TorrentFieldsType[]) {
             const ignoredErrors = config.values.interface.ignoreErrors ? config.values.interface.ignoredErrors : [];
             return await Promise.all(torrents.map(
                 async (t: TorrentBase) => await processTorrent(t, false, client, ignoredErrors)));
-        }, [client, fields]),
+        }, [client, config.values.interface.ignoreErrors, config.values.interface.ignoredErrors, fields]),
     });
 }
 
@@ -106,8 +106,8 @@ export function useTorrentDetails(torrentId: number, enabled: boolean, lookupIps
         enabled,
         queryFn: useCallback(async () => {
             const ignoredErrors = config.values.interface.ignoreErrors ? config.values.interface.ignoredErrors : [];
-            return await processTorrent(await client.getTorrentDetails(torrentId), TAURI && lookupIps, client, ignoredErrors);
-        }, [client, torrentId, lookupIps]),
+            return await processTorrent(await client.getTorrentDetails(torrentId), lookupIps, client, ignoredErrors);
+        }, [client, config.values.interface.ignoreErrors, config.values.interface.ignoredErrors, torrentId, lookupIps]),
     });
 }
 
