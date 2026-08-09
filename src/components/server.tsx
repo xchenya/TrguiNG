@@ -17,7 +17,7 @@
  */
 
 import "../css/custom.css";
-import { Box, Drawer, Flex, Loader, Overlay, Title } from "@mantine/core";
+import { ActionIcon, Box, Drawer, Flex, Loader, Overlay, Title } from "@mantine/core";
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { SplitType } from "../config";
 import { ConfigContext, ServerConfigContext } from "../config";
@@ -41,6 +41,7 @@ import Split from "react-split";
 import { RunStatus } from "../status";
 import { bytesToHumanReadableStr } from "../trutil";
 import { useIsMobile } from "../hooks/useResponsive";
+import * as Icon from "react-bootstrap-icons";
 
 function currentFiltersReducer(
     oldFilters: TorrentFilter[],
@@ -119,6 +120,7 @@ export function Server({ hostname, tabsRef }: ServerProps) {
     const [detailsDrawerOpened, { open: openDetailsDrawer, close: closeDetailsDrawer }] = useDisclosure(false);
     const [mobileSelectionMode, setMobileSelectionMode] = useState(false);
     const [mobileStatusFilter, setMobileStatusFilter] = useState("全部");
+    const [mobileFiltersMenuOpened, setMobileFiltersMenuOpened] = useState(false);
 
     let status = new RunStatus();
     const [statusIde, setStatusIde] = useState<boolean>(status.ide);
@@ -406,7 +408,14 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                 onClose={closeFiltersDrawer}
                 position="left"
                 size="md"
-                title="筛选器"
+                title={<ActionIcon
+                    variant="default"
+                    size="lg"
+                    onClick={() => { setMobileFiltersMenuOpened((v) => !v); }}
+                    title="筛选设置"
+                >
+                    <Icon.Gear size="1.1rem" />
+                </ActionIcon>}
                 className="mobile-filters-drawer"
             >
                 <Filters
@@ -415,7 +424,10 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                     setCurrentFilters={setCurrentFilters}
                     setSearchTracker={setSearchTracker}
                     setCurrentTorrentId={setCurrentTorrentInt}
-                    selectedReducer={selectedReducer} />
+                    selectedReducer={selectedReducer}
+                    mobileFiltersMenuOpened={mobileFiltersMenuOpened}
+                    setMobileFiltersMenuOpened={setMobileFiltersMenuOpened}
+                    onFilterSelected={isMobile ? closeFiltersDrawer : undefined} />
             </Drawer>
             <Drawer
                 opened={detailsDrawerOpened}
@@ -437,6 +449,7 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                     selectedTorrents,
                     hostname,
                     torrents: torrents ?? [],
+                    onSettingsClick: () => { modals.current?.daemonSettings(); },
                 }} />
             </Box>
         </Flex>

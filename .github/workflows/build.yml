@@ -18,11 +18,14 @@ jobs:
         run: |
           YEAR=$(date +%Y)
           MONTH=$(date +%m)
-          wget -nv -O- "https://download.db-ip.com/free/dbip-country-lite-${YEAR}-${MONTH}.mmdb.gz" | zcat > dbip.mmdb
+          wget -nv -O dbip.mmdb.gz "https://download.db-ip.com/free/dbip-country-lite-${YEAR}-${MONTH}.mmdb.gz"
+          zcat dbip.mmdb.gz > dbip.mmdb
       - uses: actions/upload-artifact@v4
         with:
           name: dbip
-          path: "dbip.mmdb"
+          path: |
+            dbip.mmdb
+            dbip.mmdb.gz
 
   build-webapp:
     needs: download-dbip

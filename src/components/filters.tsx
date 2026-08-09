@@ -23,7 +23,7 @@ import * as Icon from "react-bootstrap-icons";
 import * as StatusIcons from "./statusicons";
 import type { FilterSectionName, SectionsVisibility, StatusFilterName } from "../config";
 import { ConfigContext, ServerConfigContext } from "../config";
-import { Box, Button, Divider, Flex, Menu, Portal } from "@mantine/core";
+import { ActionIcon, Box, Button, Divider, Flex, Menu, Portal } from "@mantine/core";
 import {bytesToHumanReadableStr, ensurePathDelimiter, eventHasModKey, useForceRender} from "trutil";
 import { useContextMenu } from "./contextmenu";
 import { MemoSectionsContextMenu, getSectionsMap } from "./sectionscontextmenu";
@@ -31,6 +31,7 @@ import {useServerSelectedTorrents, useServerTorrentData} from "../rpc/torrent";
 import {TableSelectReducer} from "./tables/common";
 import {notifications} from "@mantine/notifications";
 import {copyToClipboard} from "../taurishim";
+import { useIsMobile } from "../hooks/useResponsive";
 
 export interface TorrentFilter {
     id: string,
@@ -129,10 +130,13 @@ interface WithCurrentFilters {
     setSearchTracker: (tracker: string) => void,
     setCurrentTorrentId: (id: number) => void,
     selectedReducer: TableSelectReducer,
+    onFilterSelected?: () => void,
 }
 
 interface FiltersProps extends WithCurrentFilters {
     torrents: Torrent[],
+    mobileFiltersMenuOpened?: boolean,
+    setMobileFiltersMenuOpened?: (v: boolean | ((v: boolean) => boolean)) => void,
 }
 
 interface FilterRowProps extends WithCurrentFilters {
@@ -202,6 +206,7 @@ const FilterRow = React.memo(function FilterRow(props: FilterRowProps) {
                 filter: { id: props.id, filter: props.filter.filter },
             });
             props.setSearchTracker("");
+            props.onFilterSelected?.();
         }}
         onDoubleClick={(event) => {
             if (props.selectAllOnDbClk) {
@@ -319,6 +324,7 @@ function DirFilterRow(props: DirFilterRowProps) {
                     filter: { id: props.id, filter: props.hideSubDirTorrents ? filterHideSub : filter },
                 });
                 props.setSearchTracker("");
+                props.onFilterSelected?.();
             }}
             onDoubleClick={(event) => {
                 if (props.selectAllOnDbClk) {
@@ -445,10 +451,11 @@ function flattenTree(root: Directory): Directory[] {
     return result;
 }
 
-export const Filters = React.memo(function Filters({ torrents, currentFilters, setCurrentFilters, setSearchTracker, setCurrentTorrentId, selectedReducer }: FiltersProps) {
+export const Filters = React.memo(function Filters({ torrents, currentFilters, setCurrentFilters, setSearchTracker, setCurrentTorrentId, selectedReducer, mobileFiltersMenuOpened, setMobileFiltersMenuOpened, onFilterSelected }: FiltersProps) {
     const config = useContext(ConfigContext);
     const serverConfig = useContext(ServerConfigContext);
     const forceRender = useForceRender();
+    const isMobile = useIsMobile();
 
     const expandedReducer = useCallback(
         ({ verb, value }: { verb: "add" | "remove" | "set", value: string | string[] }) => {
@@ -579,6 +586,71 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
     }, [config, sections]);
 
     return (<>
+        {isMobile && <Menu
+            closeOnItemClick={false}
+            middlewares={{ shift: true, flip: true }}
+            position="bottom-start"
+            opened={mobileFiltersMenuOpened ?? false}
+            onChange={setMobileFiltersMenuOpened}
+        >
+            <Menu.Target>
+                <Box sx={{ position: "absolute", top: 0, left: 0, width: 0, height: 0 }} />
+            </Menu.Target>
+            <Menu.Dropdown>
+                    {sections.map((section, index) => (
+                        <Menu.Item
+                            key={section.section}
+                            icon={section.visible ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                            onClick={() => {
+                                const newSections = [...sections];
+                                newSections[index].visible = !newSections[index].visible;
+                                setSections(newSections);
+                            }}
+                        >
+                            {section.section}
+                        </Menu.Item>
+                    ))}
+                    <Menu.Divider />
+                    <Menu.Item
+                        icon={<Box miw="1rem" />}
+                        rightSection={<Icon.ChevronRight size="12" style={{ marginRight: "-0.4rem" }} />}
+                        onMouseEnter={openStatusFiltersSubmenu}
+                    >
+                        状态项
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item
+                        icon={compactDirectories ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                        onClick={onCompactDirectoriesClick}
+                    >
+                        目录简洁展示
+                    </Menu.Item>
+                    <Menu.Item
+                        icon={hideSubDirTorrents ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                        onClick={onHideSubDirTorrentsClick}
+                    >
+                        列表不显示子目录种子
+                    </Menu.Item>
+                    <Menu.Item
+                        icon={showFilterGroupSize ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                        onClick={onShowFilterGroupSizeClick}
+                    >
+                        显示分组体积
+                    </Menu.Item>
+                    <Menu.Item
+                        icon={selectFilterGroupOnDbClk ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                        onClick={onSelectFilterGroupOnDbClkClick}
+                    >
+                        双击全选分组
+                    </Menu.Item>
+                    <Menu.Item
+                        icon={config.values.interface.ignoreErrors ? <Icon.Check size="1rem" /> : <Box miw="1rem" />}
+                        onClick={onIgnoreErrorsClick}
+                    >
+                        忽略错误
+                    </Menu.Item>
+                </Menu.Dropdown>
+        </Menu>}
         <Menu
             openDelay={100}
             closeDelay={400}
@@ -711,24 +783,28 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                                     key={`status-${f.name}`} id={`status-${f.name}`} filter={f}
                                     count={torrents.filter(f.filter).length} showSize={showFilterGroupSize}
                                     selectAllOnDbClk={selectFilterGroupOnDbClk} currentFilters={currentFilters} setCurrentFilters={setCurrentFilters}
-                                    setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}/>
+                                    setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                                    onFilterSelected={onFilterSelected}/>
                                 <FilterRow
                                     key={`status-${doneFilter.name}`} id={`status-${doneFilter.name}`} filter={doneFilter} level={1}
                                     count={torrents.filter(doneFilter.filter).length} showSize={showFilterGroupSize}
                                     selectAllOnDbClk={selectFilterGroupOnDbClk} currentFilters={currentFilters} setCurrentFilters={setCurrentFilters}
-                                    setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}/>
+                                    setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                                    onFilterSelected={onFilterSelected}/>
                                 <FilterRow
                                     key={`status-${unDoneFilter.name}`} id={`status-${unDoneFilter.name}`} filter={unDoneFilter} level={1}
                                     count={torrents.filter(unDoneFilter.filter).length} showSize={showFilterGroupSize}
                                     selectAllOnDbClk={selectFilterGroupOnDbClk} currentFilters={currentFilters} setCurrentFilters={setCurrentFilters}
-                                    setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}/>
+                                    setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                                    onFilterSelected={onFilterSelected}/>
                             </div>
                         } else {
                             return <FilterRow
                                 key={`status-${f.name}`} id={`status-${f.name}`} filter={f}
                                 count={torrents.filter(f.filter).length} showSize={showFilterGroupSize}
                                 selectAllOnDbClk={selectFilterGroupOnDbClk} currentFilters={currentFilters} setCurrentFilters={setCurrentFilters}
-                                setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}/>
+                                setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                                onFilterSelected={onFilterSelected}/>
                         }
                     }
                 })}
@@ -738,7 +814,7 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                 {dirs.map((d) =>
                     <DirFilterRow key={`dir-${d.path}`} id={`dir-${d.path}`}
                         showSize={showFilterGroupSize} hideSubDirTorrents={hideSubDirTorrents} selectAllOnDbClk={selectFilterGroupOnDbClk}
-                        dir={d} expandedReducer={expandedReducer} {...{ torrents, currentFilters, setCurrentFilters, setSearchTracker, setCurrentTorrentId, selectedReducer }} />)}
+                        dir={d} expandedReducer={expandedReducer} {...{ torrents, currentFilters, setCurrentFilters, setSearchTracker, setCurrentTorrentId, selectedReducer, onFilterSelected }} />)}
             </div>}
             {sections[sectionsMap["用户标签"]]?.visible && <div style={{ order: sectionsMap["用户标签"] }}>
                 <Divider mx="sm" mt="md" label="用户标签" labelPosition="center" />
@@ -746,12 +822,14 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                     id="nolabels" filter={noLabelsFilter}
                     count={torrents.filter(noLabelsFilter.filter).length}
                     showSize={showFilterGroupSize} selectAllOnDbClk={selectFilterGroupOnDbClk}
-                    currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer} />
+                    currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                    onFilterSelected={onFilterSelected} />
                 {Object.keys(labels).sort().map((label) =>
                     <LabelFilterRow key={`labels-${label}`} label={label}
                         count={labels[label]}
                         showSize={showFilterGroupSize} selectAllOnDbClk={selectFilterGroupOnDbClk}
-                        currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer} />)}
+                        currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                        onFilterSelected={onFilterSelected} />)}
             </div>}
             {sections[sectionsMap["服务器分布"]]?.visible && <div style={{ order: sectionsMap["服务器分布"] }}>
                 <Divider mx="sm" mt="md" label="服务器分布" labelPosition="center" />
@@ -759,7 +837,8 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                     <TrackerFilterRow key={`trackers-${tracker}`} tracker={tracker}
                         count={trackers[tracker]}
                         showSize={showFilterGroupSize} selectAllOnDbClk={selectFilterGroupOnDbClk}
-                        currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer} />)}
+                        currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                        onFilterSelected={onFilterSelected} />)}
             </div>}
             {sections[sectionsMap["错误分布"]]?.visible && <div style={{ order: sectionsMap["错误分布"] }}>
                 <Divider mx="sm" mt="md" label="错误分布" labelPosition="center" />
@@ -767,7 +846,8 @@ export const Filters = React.memo(function Filters({ torrents, currentFilters, s
                     <ErrorFilterRow key={`errors-${error}`} error={error}
                         count={errors[error]}
                         showSize={showFilterGroupSize} selectAllOnDbClk={selectFilterGroupOnDbClk}
-                        currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer} />)}
+                        currentFilters={currentFilters} setCurrentFilters={setCurrentFilters} setSearchTracker={setSearchTracker} setCurrentTorrentId={setCurrentTorrentId} selectedReducer={selectedReducer}
+                        onFilterSelected={onFilterSelected} />)}
             </div>}
         </Flex>
     </>);

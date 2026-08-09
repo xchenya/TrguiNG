@@ -17,7 +17,7 @@
  */
 
 import type { MantineTheme } from "@mantine/core";
-import { ActionIcon, Box, Button, Drawer, Flex, Kbd, Menu, NativeSelect, SegmentedControl, Text, TextInput, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Box, Button, Divider, Drawer, Flex, Kbd, Menu, NativeSelect, SegmentedControl, Text, TextInput, UnstyledButton, useMantineTheme } from "@mantine/core";
 import debounce from "lodash-es/debounce";
 import React, { forwardRef, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Icon from "react-bootstrap-icons";
@@ -171,11 +171,14 @@ function useButtonHandlers(
             pauseAll: action("torrent-stop", "all"),
             pauseError: action("torrent-stop", "error"),
             pauseDownload: action("torrent-stop", "download"),
-            remove: checkSelected(props.modals.current?.remove),
+            reannounce: checkSelected(action("torrent-reannounce")),
+            verify: checkSelected(action("torrent-verify")),
+            remove: checkSelected(() => { props.modals.current?.remove(); }),
             queueDown: checkSelected(action("queue-move-down")),
             queueUp: checkSelected(action("queue-move-up")),
-            move: checkSelected(props.modals.current?.move),
-            setLabels: checkSelected(props.modals.current?.setLabels),
+            move: checkSelected(() => { props.modals.current?.move(); }),
+            setLabels: checkSelected(() => { props.modals.current?.setLabels(); }),
+            editTrackers: checkSelected(() => { props.modals.current?.editTrackers(); }),
             setPriorityHigh: checkSelected(priority(BandwidthPriority.high)),
             setPriorityNormal: checkSelected(priority(BandwidthPriority.normal)),
             setPriorityLow: checkSelected(priority(BandwidthPriority.low)),
@@ -208,6 +211,186 @@ function useButtonHandlers(
         toggleAltSpeedMode,
     };
 }
+
+interface MobileSelectionToolbarProps {
+    selected: boolean,
+    selectedCount: number,
+    mobileSelectionMode: boolean,
+    exitMobileSelectionMode: () => void,
+    handlers: ReturnType<typeof useButtonHandlers>,
+    toggleDetailsPanel: () => void,
+}
+
+const MobileSelectionToolbar = memo(function MobileSelectionToolbar({
+    selected,
+    selectedCount,
+    mobileSelectionMode,
+    exitMobileSelectionMode,
+    handlers,
+    toggleDetailsPanel,
+}: MobileSelectionToolbarProps) {
+    const theme = useMantineTheme();
+    const [moreDrawerOpened, { open: openMoreDrawer, close: closeMoreDrawer }] = useDisclosure(false);
+    const hasSelectedOnceRef = useRef(false);
+
+    useEffect(() => {
+        if (selectedCount > 0) {
+            hasSelectedOnceRef.current = true;
+        }
+    }, [selectedCount]);
+
+    useEffect(() => {
+        if (!selected && moreDrawerOpened) {
+            closeMoreDrawer();
+        }
+    }, [selected, moreDrawerOpened, closeMoreDrawer]);
+
+    useEffect(() => {
+        if (hasSelectedOnceRef.current && selectedCount === 0 && !moreDrawerOpened && mobileSelectionMode) {
+            hasSelectedOnceRef.current = false;
+            exitMobileSelectionMode();
+        }
+    }, [selectedCount, moreDrawerOpened, mobileSelectionMode, exitMobileSelectionMode]);
+
+    const handleAction = useCallback((action?: () => void) => {
+        closeMoreDrawer();
+        if (action != null) {
+            action();
+        }
+    }, [closeMoreDrawer]);
+
+    return (
+        <>
+            <Box
+                className="mobile-selection-toolbar"
+                sx={{
+                    position: "fixed",
+                    bottom: "var(--mobile-statusbar-height)",
+                    left: 0,
+                    right: 0,
+                    zIndex: 100,
+                    backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
+                    borderTop: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[3]}`,
+                }}
+            >
+                <Flex justify="space-around" align="center" py={6} px="xs">
+                    <UnstyledButton
+                        className="mobile-batch-action-btn"
+                        disabled={!selected}
+                        onClick={handlers.start}
+                    >
+                        <Icon.PlayCircleFill size="1.25rem" color={!selected ? theme.colors.gray[5] : theme.colors.blue[6]} />
+                        <Text size="xs" color={!selected ? "dimmed" : undefined}>开始</Text>
+                    </UnstyledButton>
+                    <UnstyledButton
+                        className="mobile-batch-action-btn"
+                        disabled={!selected}
+                        onClick={handlers.pause}
+                    >
+                        <Icon.PauseCircleFill size="1.25rem" color={!selected ? theme.colors.gray[5] : theme.colors.blue[6]} />
+                        <Text size="xs" color={!selected ? "dimmed" : undefined}>暂停</Text>
+                    </UnstyledButton>
+                    <UnstyledButton
+                        className="mobile-batch-action-btn"
+                        disabled={!selected}
+                        onClick={handlers.remove}
+                    >
+                        <Icon.XCircleFill size="1.25rem" color={!selected ? theme.colors.gray[5] : theme.colors.red[6]} />
+                        <Text size="xs" color={!selected ? "dimmed" : undefined}>删除</Text>
+                    </UnstyledButton>
+                    <UnstyledButton
+                        className="mobile-batch-action-btn"
+                        disabled={!selected}
+                        onClick={openMoreDrawer}
+                    >
+                        <Icon.ThreeDots size="1.25rem" color={!selected ? theme.colors.gray[5] : theme.colors.blue[6]} />
+                        <Text size="xs" color={!selected ? "dimmed" : undefined}>更多</Text>
+                    </UnstyledButton>
+                </Flex>
+            </Box>
+            <Drawer
+                opened={moreDrawerOpened}
+                onClose={closeMoreDrawer}
+                position="bottom"
+                size="auto"
+                title={`批量操作 (${selectedCount} 项)`}
+                className="mobile-batch-actions-drawer"
+            >
+                <Box className="mobile-batch-actions-body">
+                    <Text size="xs" weight={700} color="dimmed" px="xs" pt="xs" pb={4}>传输操作</Text>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.reannounce); }}>
+                        <Icon.Wifi size="1.1rem" color={theme.colors.blue[6]} />
+                        <Text size="sm">重新汇报</Text>
+                    </UnstyledButton>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.verify); }}>
+                        <Icon.CheckAll size="1.1rem" color={theme.colors.blue[6]} />
+                        <Text size="sm">重新校验</Text>
+                    </UnstyledButton>
+
+                    <Divider my="xs" />
+
+                    <Text size="xs" weight={700} color="dimmed" px="xs" pt="xs" pb={4}>队列操作</Text>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.queueUp); }}>
+                        <Icon.ArrowUpCircleFill size="1.1rem" color={theme.colors.green[8]} />
+                        <Text size="sm">队列上移</Text>
+                    </UnstyledButton>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.queueDown); }}>
+                        <Icon.ArrowDownCircleFill size="1.1rem" color={theme.colors.green[8]} />
+                        <Text size="sm">队列下移</Text>
+                    </UnstyledButton>
+
+                    <Divider my="xs" />
+
+                    <Text size="xs" weight={700} color="dimmed" px="xs" pt="xs" pb={4}>编辑操作</Text>
+                    <UnstyledButton
+                        className="mobile-batch-item-btn"
+                        disabled={selectedCount > 1}
+                        onClick={() => { handleAction(handlers.editTrackers); }}
+                    >
+                        <Icon.Globe size="1.1rem" color={selectedCount > 1 ? theme.colors.gray[5] : theme.colors.blue[6]} />
+                        <Text size="sm" color={selectedCount > 1 ? "dimmed" : undefined}>修改 Tracker</Text>
+                    </UnstyledButton>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.move); }}>
+                        <Icon.FolderFill size="1.1rem" color={theme.colors.yellow[6]} />
+                        <Text size="sm">变更目录</Text>
+                    </UnstyledButton>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.setLabels); }}>
+                        <Icon.TagsFill size="1.1rem" color={theme.colors.blue[6]} />
+                        <Text size="sm">设置标签</Text>
+                    </UnstyledButton>
+
+                    <Divider my="xs" />
+
+                    <Text size="xs" weight={700} color="dimmed" px="xs" pt="xs" pb={4}>优先级</Text>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.setPriorityHigh); }}>
+                        <Icon.CircleFill size="0.8rem" color={theme.colors.orange[7]} />
+                        <Text size="sm">高</Text>
+                    </UnstyledButton>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.setPriorityNormal); }}>
+                        <Icon.CircleFill size="0.8rem" color={theme.colors.teal[9]} />
+                        <Text size="sm">正常</Text>
+                    </UnstyledButton>
+                    <UnstyledButton className="mobile-batch-item-btn" onClick={() => { handleAction(handlers.setPriorityLow); }}>
+                        <Icon.CircleFill size="0.8rem" color={theme.colors.yellow[6]} />
+                        <Text size="sm">低</Text>
+                    </UnstyledButton>
+
+                    <Divider my="xs" />
+
+                    <Text size="xs" weight={700} color="dimmed" px="xs" pt="xs" pb={4}>详情</Text>
+                    <UnstyledButton
+                        className="mobile-batch-item-btn"
+                        disabled={selectedCount !== 1}
+                        onClick={() => { handleAction(toggleDetailsPanel); }}
+                    >
+                        <Icon.InfoCircleFill size="1.1rem" color={selectedCount !== 1 ? theme.colors.gray[5] : theme.colors.blue[6]} />
+                        <Text size="sm" color={selectedCount !== 1 ? "dimmed" : undefined}>种子详情</Text>
+                    </UnstyledButton>
+                </Box>
+            </Drawer>
+        </>
+    );
+});
 
 function MobileToolbar(props: ToolbarProps) {
     const theme = useMantineTheme();
@@ -261,9 +444,6 @@ function MobileToolbar(props: ToolbarProps) {
                             ref={searchRef}
                             placeholder="搜索种子"
                             icon={<Icon.Search size="1rem" />}
-                            rightSection={<ActionIcon onClick={onSearchClear} title="清除搜索">
-                                <Icon.XLg size="1rem" color={theme.colors.red[6]} />
-                            </ActionIcon>}
                             onInput={onSearchInput}
                             sx={{ flexGrow: 1 }}
                             styles={{ input: { height: "2.5rem", borderRadius: theme.radius.md } }}
@@ -279,63 +459,14 @@ function MobileToolbar(props: ToolbarProps) {
                         data={["全部", "下载中", "已完成", "错误"]}
                     />
                 </>}
-            {props.mobileSelectionMode && <Box
-                sx={{
-                    position: "fixed",
-                    bottom: "var(--mobile-statusbar-height)",
-                    left: 0,
-                    right: 0,
-                    zIndex: 100,
-                    backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
-                    borderTop: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[3]}`,
-                }}
-            >
-                <Flex justify="space-around" align="center" p="xs">
-                    <ActionIcon variant="subtle" size="lg" disabled={!selected} onClick={handlers.start}>
-                        <Icon.PlayCircleFill size="1.5rem" color={!selected ? theme.colors.gray[5] : theme.colors.blue[6]} />
-                    </ActionIcon>
-                    <ActionIcon variant="subtle" size="lg" disabled={!selected} onClick={handlers.pause}>
-                        <Icon.PauseCircleFill size="1.5rem" color={!selected ? theme.colors.gray[5] : theme.colors.blue[6]} />
-                    </ActionIcon>
-                    <ActionIcon variant="subtle" size="lg" disabled={!selected} onClick={handlers.remove}>
-                        <Icon.XCircleFill size="1.5rem" color={!selected ? theme.colors.gray[5] : theme.colors.red[6]} />
-                    </ActionIcon>
-                    <Menu shadow="md" width="12rem" withinPortal position="top-end">
-                        <Menu.Target>
-                            <ActionIcon variant="subtle" size="lg">
-                                <Icon.ThreeDots size="1.5rem" />
-                            </ActionIcon>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                            <Menu.Item icon={<Icon.PlusSquare size="1rem" />} onClick={() => props.modals.current?.addMagnet()}>
-                                添加种子链接
-                            </Menu.Item>
-                            <Menu.Item icon={<Icon.ArrowUpCircleFill size="1rem" />} disabled={!selected} onClick={handlers.queueUp}>
-                                队列上移
-                            </Menu.Item>
-                            <Menu.Item icon={<Icon.ArrowDownCircleFill size="1rem" />} disabled={!selected} onClick={handlers.queueDown}>
-                                队列下移
-                            </Menu.Item>
-                            <Menu.Item icon={<Icon.FolderFill size="1rem" />} disabled={!selected} onClick={handlers.move}>
-                                修改目录
-                            </Menu.Item>
-                            <Menu.Item icon={<Icon.TagsFill size="1rem" />} disabled={!selected} onClick={handlers.setLabels}>
-                                设置标签
-                            </Menu.Item>
-                            <Menu.Item icon={<Icon.InfoCircleFill size="1rem" />} disabled={serverSelected.size !== 1} onClick={props.toggleDetailsPanel}>
-                                种子详情
-                            </Menu.Item>
-                            <Menu.Divider />
-                            <Menu.Item icon={<Icon.Speedometer2 size="1rem" />} onClick={handlers.toggleAltSpeedMode}>
-                                切换备用带宽
-                            </Menu.Item>
-                            <Menu.Item icon={<Icon.Tools size="1rem" />} onClick={handlers.daemonSettings}>
-                                设置
-                            </Menu.Item>
-                        </Menu.Dropdown>
-                    </Menu>
-                </Flex>
-            </Box>}
+            {props.mobileSelectionMode && <MobileSelectionToolbar
+                selected={selected}
+                selectedCount={serverSelected.size}
+                mobileSelectionMode={props.mobileSelectionMode}
+                exitMobileSelectionMode={props.exitMobileSelectionMode}
+                handlers={handlers}
+                toggleDetailsPanel={props.toggleDetailsPanel}
+            />}
             {!props.mobileSelectionMode && <ActionIcon
                 className="mobile-add-fab"
                 variant="filled"

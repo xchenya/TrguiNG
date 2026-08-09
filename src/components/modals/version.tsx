@@ -69,7 +69,7 @@ export function VersionModal({ opened, close }: ModalState) {
                     <Grid.Col span={3}>日期</Grid.Col>
                     <Grid.Col span={8}>{new Date(appVersion.buildDate).toLocaleString()}</Grid.Col>
                     <Grid.Col span={3}>源码</Grid.Col>
-                    <Grid.Col span={8}><Box component="span" mr="sm"><Github /></Box><Anchor href="https://github.com/jayzcoder/TrguiNG" target="_blank" rel="noreferrer">Github</Anchor></Grid.Col>
+                    <Grid.Col span={8}><Box component="span" mr="sm"><Github /></Box><Anchor href="https://github.com/xchenya/TrguiNG" target="_blank" rel="noreferrer">Github</Anchor></Grid.Col>
                     <Grid.Col mt="xl">{TAURI && <Anchor href="https://db-ip.com" target="_blank" rel="noreferrer">IP Geolocation by DB-IP</Anchor>}</Grid.Col>
                 </Grid>
             </Flex>

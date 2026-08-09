@@ -103,7 +103,7 @@ svg:not(:root) {
     }
 
     .mobile-statusbar-speed {
-        flex: 1 1 50%;
+        flex: 0 1 auto;
         min-width: 0;
         padding-inline: 0.25rem;
     }

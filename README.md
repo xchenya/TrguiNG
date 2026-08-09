@@ -1,5 +1,5 @@
 
-## 基于 [jayzcoder/TrguiNG](https://github.com/jayzcoder/TrguiNG) 增加部分功能
+## 基于 [xchenya/TrguiNG](https://github.com/xchenya/TrguiNG) 增加部分功能
 
 ### 更新 (260803a)
 1. add: 忽略错误功能（支持通配符过滤，可在参数设置>其他设置中配置）
@@ -44,7 +44,7 @@
 ## PS. 主要是自用，有想加功能的可以提 issues，不保证实现
 
 ## 安装介绍（docker 环境）
-1. 从 [releases](https://github.com/jayzcoder/TrguiNG/releases) 下载 `trguing-web-xxxx-zh.zip`
+1. 从 [releases](https://github.com/xchenya/TrguiNG/releases) 下载 `trguing-web-xxxx-zh.zip`
 2. 解压到 transmission 设置的 webui 目录即可
 3. transmission 需要正确映射并设置环境变量(确保 index.html 位于 TRANSMISSION_WEB_HOME 所在的目录第一层):
    ```

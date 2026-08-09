@@ -19,10 +19,11 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { byteRateToHumanReadableStr, bytesToHumanReadableStr } from "../trutil";
 import * as Icon from "react-bootstrap-icons";
-import { Box, Flex, Menu } from "@mantine/core";
+import { ActionIcon, Box, Flex, Menu } from "@mantine/core";
 import type { SessionInfo } from "rpc/client";
 import type { Torrent } from "rpc/torrent";
 import { ColorSchemeToggle, FontSizeToggle, ShowVersion } from "components/miscbuttons";
+import { useMutateSession } from "queries";
 import { ConfigContext, ServerConfigContext } from "config";
 import { useContextMenu } from "./contextmenu";
 import { MemoSectionsContextMenu, getSectionsMap } from "./sectionscontextmenu";
@@ -36,12 +37,14 @@ export interface StatusbarProps {
     filteredTorrents: Torrent[],
     selectedTorrents: Set<number>,
     hostname: string,
+    onSettingsClick?: () => void,
 }
 
-export function Statusbar({ session, torrents, filteredTorrents, selectedTorrents, hostname }: StatusbarProps) {
+export function Statusbar({ session, torrents, filteredTorrents, selectedTorrents, hostname, onSettingsClick }: StatusbarProps) {
     const config = useContext(ConfigContext);
     const serverConfig = useContext(ServerConfigContext);
     const isMobile = useIsMobile();
+    const sessionMutation = useMutateSession();
 
     const serverFields = useMemo(() => ({
         downRateLimit: session !== undefined
@@ -129,17 +132,39 @@ export function Statusbar({ session, torrents, filteredTorrents, selectedTorrent
         </Menu.Item>
     </MemoSectionsContextMenu>;
 
+    const toggleAltSpeed = useCallback(() => {
+        sessionMutation.mutate({ "alt-speed-enabled": session?.["alt-speed-enabled"] !== true });
+    }, [session, sessionMutation]);
+
     const statusbarTools = <Flex className="mobile-statusbar-tools" sx={{ flex: "0 0 auto" }}>
-        <ColorSchemeToggle sz="0.9rem" btn="md" />
-        <FontSizeToggle sz="0.9rem" btn="md" />
-        <ShowVersion sz="0.9rem" btn="md" />
+        <ColorSchemeToggle sz="1.1rem" btn="lg" />
+        <FontSizeToggle sz="1.1rem" btn="lg" />
+        <ActionIcon
+            variant="default"
+            size="lg"
+            onClick={toggleAltSpeed}
+            title={`切换限速 (${session?.["alt-speed-enabled"] === true ? "当前: 开" : "当前: 关"})`}
+            my="auto"
+        >
+            <Icon.Speedometer2 size="1.1rem" />
+        </ActionIcon>
+        {onSettingsClick != null && <ActionIcon
+            variant="default"
+            size="lg"
+            onClick={onSettingsClick}
+            title="设置"
+            my="auto"
+        >
+            <Icon.Gear size="1.1rem" />
+        </ActionIcon>}
+        <ShowVersion sz="1.1rem" btn="lg" />
     </Flex>;
 
     if (isMobile) {
         return (
             <Flex className="statusbar mobile-statusbar" direction="column" onContextMenu={handler}>
                 {sectionsContextMenu}
-                <Flex className="mobile-statusbar-row" align="center">
+                <Flex className="mobile-statusbar-row" align="center" justify="space-between">
                     {isSectionVisible("下载速度") &&
                         <Flex className="mobile-statusbar-speed" align="center" title={`${downRate}/s (${byteRateToHumanReadableStr(serverFields.downRateLimit * 1024)})`}>
                             <Box component="span" mr="xs">{showGlobalSpeeds && <Icon.Globe />}<Icon.ArrowDown /></Box>
