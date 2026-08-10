@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Anchor, Box, Divider, Flex, Grid, Text, Title } from "@mantine/core";
+import { Anchor, Box, Button, Divider, Flex, Grid, Text, Title } from "@mantine/core";
 import type { ModalState } from "./common";
 import { HkModal } from "./common";
 import appVersionJson from "build/version.json";
@@ -26,6 +26,7 @@ import TauriLogo from "svg/tauri.svg";
 import AppLogo from "svg/app.svg";
 import { Github } from "react-bootstrap-icons";
 import UserAgent from "ua-parser-js";
+import { useIsMobile } from "../../hooks/useResponsive";
 const { TAURI } = await import(/* webpackChunkName: "taurishim" */"taurishim");
 
 interface AppVersion {
@@ -38,6 +39,7 @@ export const appVersion: AppVersion = appVersionJson;
 
 export function VersionModal({ opened, close }: ModalState) {
     const [frontend, setFrontend] = useState<string>();
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         if (opened && frontend === undefined) {
@@ -54,33 +56,36 @@ export function VersionModal({ opened, close }: ModalState) {
 
     return (
         <HkModal opened={opened} onClose={close} size="lg" centered p="lg">
-            <Title order={2} mb="lg">TrguiNG - 中文版</Title>
-            <Text>
-                <Anchor href="https://transmissionbt.com/" target="_blank" rel="noreferrer">Transmission</Anchor> WebUI
-            </Text>
-            <Divider px="sm" my="xl" />
-            <Flex gap="md" align="center">
-                <AppLogo style={{ flexShrink: 0 }} />
-                <Grid>
-                    <Grid.Col span={3}>版本</Grid.Col>
-                    <Grid.Col span={8}>{appVersion.gitVersion}</Grid.Col>
-                    <Grid.Col span={3}>前端</Grid.Col>
-                    <Grid.Col span={8}>{frontend}</Grid.Col>
-                    <Grid.Col span={3}>日期</Grid.Col>
-                    <Grid.Col span={8}>{new Date(appVersion.buildDate).toLocaleString()}</Grid.Col>
-                    <Grid.Col span={3}>源码</Grid.Col>
-                    <Grid.Col span={8}><Box component="span" mr="sm"><Github /></Box><Anchor href="https://github.com/xchenya/TrguiNG" target="_blank" rel="noreferrer">Github</Anchor></Grid.Col>
-                    <Grid.Col mt="xl">{TAURI && <Anchor href="https://db-ip.com" target="_blank" rel="noreferrer">IP Geolocation by DB-IP</Anchor>}</Grid.Col>
-                </Grid>
-            </Flex>
-            <Divider px="sm" my="xl" />
-            <Text align="center">
-                Powered by
-            </Text>
-            <Flex justify="center">
-                <Anchor href="https://react.dev/" target="_blank" rel="noreferrer"><ReactLogo /></Anchor>
-                <Anchor href="https://tauri.app/" target="_blank" rel="noreferrer"><TauriLogo /></Anchor>
-            </Flex>
+            <Box sx={{ maxHeight: isMobile ? "80vh" : undefined, overflowY: isMobile ? "auto" : undefined }}>
+                <Title order={2} mb="lg">TrguiNG - 中文版</Title>
+                <Text>
+                    <Anchor href="https://transmissionbt.com/" target="_blank" rel="noreferrer">Transmission</Anchor> WebUI
+                </Text>
+                <Divider px="sm" my="xl" />
+                <Flex gap="md" align="center">
+                    <AppLogo style={{ flexShrink: 0 }} />
+                    <Grid>
+                        <Grid.Col span={3}>版本</Grid.Col>
+                        <Grid.Col span={8}>{appVersion.gitVersion}</Grid.Col>
+                        <Grid.Col span={3}>前端</Grid.Col>
+                        <Grid.Col span={8}>{frontend}</Grid.Col>
+                        <Grid.Col span={3}>日期</Grid.Col>
+                        <Grid.Col span={8}>{new Date(appVersion.buildDate).toLocaleString()}</Grid.Col>
+                        <Grid.Col span={3}>源码</Grid.Col>
+                        <Grid.Col span={8}><Box component="span" mr="sm"><Github /></Box><Anchor href="https://github.com/xchenya/TrguiNG" target="_blank" rel="noreferrer">Github</Anchor></Grid.Col>
+                        <Grid.Col mt="xl">{TAURI && <Anchor href="https://db-ip.com" target="_blank" rel="noreferrer">IP Geolocation by DB-IP</Anchor>}</Grid.Col>
+                    </Grid>
+                </Flex>
+                <Divider px="sm" my="xl" />
+                <Text align="center">
+                    Powered by
+                </Text>
+                <Flex justify="center">
+                    <Anchor href="https://react.dev/" target="_blank" rel="noreferrer"><ReactLogo /></Anchor>
+                    <Anchor href="https://tauri.app/" target="_blank" rel="noreferrer"><TauriLogo /></Anchor>
+                </Flex>
+            </Box>
+            {isMobile && <Button fullWidth variant="light" mt="lg" onClick={close}>关闭</Button>}
         </HkModal>
     );
 }

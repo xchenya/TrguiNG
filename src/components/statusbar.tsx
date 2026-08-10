@@ -177,8 +177,9 @@ export function Statusbar({ session, torrents, filteredTorrents, selectedTorrent
                         </Flex>}
                 </Flex>
                 <Flex className="mobile-statusbar-row" align="center">
-                    <Box className="mobile-statusbar-selection" title={`选中大小: ${sizeSelected}, 完成 ${sizeDone}, 剩余 ${sizeLeft}`}>
-                        {isSectionVisible("选中大小") && `选中大小: ${sizeSelected}, 完成 ${sizeDone}, 剩余 ${sizeLeft}`}
+                    <Box className="mobile-statusbar-selection" sx={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                        title={`选中大小: ${sizeSelected}, 完成 ${sizeDone}, 剩余 ${sizeLeft}`}>
+                        {isSectionVisible("选中大小") && `已选 ${sizeSelected} (${sizeDone}/${sizeLeft})`}
                     </Box>
                     {statusbarTools}
                 </Flex>
