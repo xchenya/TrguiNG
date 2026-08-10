@@ -34,6 +34,7 @@ import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { bytesToHumanReadableStr, modKeyString } from "trutil";
 import { useServerSelectedTorrents, useServerTorrentData } from "rpc/torrent";
 import { useIsMobile } from "../hooks/useResponsive";
+import { MobileSortFields } from "./tables/torrenttable";
 
 interface ToolbarButtonProps extends React.PropsWithChildren<React.ComponentPropsWithRef<"button">> {
     depressed?: boolean,
@@ -80,6 +81,9 @@ interface ToolbarProps {
     selectAllMobileTorrents: () => void,
     mobileStatusFilter: string,
     setMobileStatusFilter: (filter: string) => void,
+    mobileSortField?: string,
+    mobileSortDesc?: boolean,
+    setMobileSorting?: (field: string, desc: boolean) => void,
 }
 
 function useButtonHandlers(
@@ -399,7 +403,12 @@ function MobileToolbar(props: ToolbarProps) {
     const searchRef = useRef<HTMLInputElement>(null);
     const serverSelected = useServerSelectedTorrents();
     const selected = useMemo(() => serverSelected?.size > 0, [serverSelected]);
-    const [addDrawerOpened, { open: openAddDrawer, close: closeAddDrawer }] = useDisclosure(false);
+    const [addDrawerOpened, { open: openAddDrawer, close: openAddDrawerClose }] = useDisclosure(false);
+    const [sortDrawerOpened, { open: openSortDrawer, close: closeSortDrawer }] = useDisclosure(false);
+
+    const isSorted = props.mobileSortField != null && props.mobileSortField !== "";
+    const currentSortField = MobileSortFields.find((f) => f.id === props.mobileSortField);
+    const currentSortLabel = currentSortField?.label ?? "无";
 
     const debouncedSetSearchTerms = useMemo(
         () => debounce(props.setSearchTerms, 500, { trailing: true, leading: false }),
@@ -427,6 +436,19 @@ function MobileToolbar(props: ToolbarProps) {
         props.setSearchTerms([]);
     }, [debouncedSetSearchTerms, props]);
 
+    const handleSortSelect = useCallback((fieldId: string) => {
+        if (!props.setMobileSorting) return;
+        const desc = fieldId === props.mobileSortField ? !(props.mobileSortDesc ?? false) : true;
+        props.setMobileSorting(fieldId, desc);
+        closeSortDrawer();
+    }, [props, closeSortDrawer]);
+
+    const handleSortDirectionToggle = useCallback(() => {
+        if (!props.setMobileSorting || !props.mobileSortField) return;
+        props.setMobileSorting(props.mobileSortField, !(props.mobileSortDesc ?? false));
+        closeSortDrawer();
+    }, [props, closeSortDrawer]);
+
     return (
         <Flex direction="column" w="100%">
             {props.mobileSelectionMode
@@ -448,6 +470,15 @@ function MobileToolbar(props: ToolbarProps) {
                             sx={{ flexGrow: 1 }}
                             styles={{ input: { height: "2.5rem", borderRadius: theme.radius.md } }}
                         />
+                        <ActionIcon
+                            variant={isSorted ? "light" : "default"}
+                            color={isSorted ? "blue" : undefined}
+                            size="lg"
+                            onClick={openSortDrawer}
+                            title="排序"
+                        >
+                            <Icon.SortDown size="1.1rem" />
+                        </ActionIcon>
                         <Button variant="subtle" compact onClick={props.enterMobileSelectionMode}>选择</Button>
                     </Flex>
                     <SegmentedControl
@@ -479,16 +510,48 @@ function MobileToolbar(props: ToolbarProps) {
             >
                 <Icon.PlusLg size="1.5rem" />
             </ActionIcon>}
-            <Drawer opened={addDrawerOpened} onClose={closeAddDrawer} position="bottom" size="auto" title="添加种子">
+            <Drawer opened={addDrawerOpened} onClose={openAddDrawerClose} position="bottom" size="auto" title="添加种子">
                 <Flex direction="column" gap="sm" pb="md">
                     <Button leftIcon={<Icon.MagnetFill />} size="lg" variant="light" onClick={() => {
-                        closeAddDrawer();
+                        openAddDrawerClose();
                         props.modals.current?.addMagnet();
                     }}>添加种子链接</Button>
                     <Button leftIcon={<Icon.FileArrowDownFill />} size="lg" variant="light" onClick={() => {
-                        closeAddDrawer();
+                        openAddDrawerClose();
                         props.modals.current?.addTorrent();
                     }}>上传种子文件</Button>
+                </Flex>
+            </Drawer>
+            <Drawer opened={sortDrawerOpened} onClose={closeSortDrawer} position="bottom" size="auto" title="排序">
+                <Flex direction="column" pb="md">
+                    {isSorted && <Flex align="center" justify="space-between" mb="md" mx="xs">
+                        <Text size="sm" color="dimmed">
+                            当前: {currentSortLabel} {props.mobileSortDesc ? "↓ 降序" : "↑ 升序"}
+                        </Text>
+                        <Button size="xs" variant="light" onClick={handleSortDirectionToggle}>
+                            {props.mobileSortDesc ? "切换为升序" : "切换为降序"}
+                        </Button>
+                    </Flex>}
+                    <Flex direction="column" gap={2}>
+                        {MobileSortFields.map((field) => {
+                            const isActive = props.mobileSortField === field.id;
+                            const isDesc = isActive && (props.mobileSortDesc ?? false);
+                            return <Button
+                                key={field.id}
+                                variant={isActive ? "light" : "subtle"}
+                                color={isActive ? "blue" : undefined}
+                                fullWidth
+                                leftIcon={isActive
+                                    ? <Text size="xs" weight={700}>{isDesc ? "↓" : "↑"}</Text>
+                                    : undefined}
+                                onClick={() => handleSortSelect(field.id)}
+                                p="xs"
+                                sx={{ justifyContent: "flex-start" }}
+                            >
+                                {field.label}
+                            </Button>;
+                        })}
+                    </Flex>
                 </Flex>
             </Drawer>
         </Flex>

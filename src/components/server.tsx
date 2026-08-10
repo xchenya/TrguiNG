@@ -21,6 +21,7 @@ import { ActionIcon, Box, Drawer, Flex, Loader, Overlay, Title } from "@mantine/
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { SplitType } from "../config";
 import { ConfigContext, ServerConfigContext } from "../config";
+import type { SortByConfig } from "../config";
 import type { ServerTorrentData, Torrent } from "../rpc/torrent";
 import { ServerRpcVersionContext, ServerSelectedTorrentsContext, ServerTorrentDataContext } from "../rpc/torrent";
 import { MemoizedDetails } from "./details";
@@ -247,6 +248,15 @@ export function Server({ hostname, tabsRef }: ServerProps) {
         config.values.interface.mainSplit,
         config.values.interface.mainSplit === "vertical" ? "horizontal" : "vertical"]);
 
+    const [mobileSorting, setMobileSortingRaw] = useState<SortByConfig[]>(
+        config.getTableSortBy("torrents"),
+    );
+    const setMobileSorting = useCallback((field: string, desc: boolean) => {
+        const newSort: SortByConfig[] = field ? [{ id: field, desc }] : [];
+        setMobileSortingRaw(newSort);
+        config.setTableSortBy("torrents", newSort);
+    }, [config]);
+
     const toggleToolbarDetails = useCallback(() => {
         if (!isMobile) {
             toggleDetailsPanel();
@@ -341,6 +351,9 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                     selectAllMobileTorrents={selectAllMobileTorrents}
                     mobileStatusFilter={mobileStatusFilter}
                     setMobileStatusFilter={setMobileStatusFilter}
+                    mobileSortField={mobileSorting[0]?.id}
+                    mobileSortDesc={mobileSorting[0]?.desc}
+                    setMobileSorting={setMobileSorting}
                 />
             </Box>
             <Box sx={{ flexGrow: 1, minHeight: 0, display: "flex", flexDirection: "column", paddingBottom: isMobile && mobileSelectionMode ? "3.75rem" : 0 }}>
@@ -384,7 +397,9 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                                         mobileSelectionMode={mobileSelectionMode}
                                         onColumnVisibilityChange={setTableRequiredFields}
                                         scrollToRow={scrollToRow}
-                                        setStatus={updateStatus} />}
+                                        setStatus={updateStatus}
+                                        mobileSortField={mobileSorting[0]?.id}
+                                        mobileSortDesc={mobileSorting[0]?.desc} />}
                                 bottom={!isMobile && showDetailsPanel
                                     ? <MemoizedDetails torrentId={currentTorrent} updates={updates} />
                                     : undefined}/>
@@ -397,7 +412,9 @@ export function Server({ hostname, tabsRef }: ServerProps) {
                                 mobileSelectionMode={mobileSelectionMode}
                                 onColumnVisibilityChange={setTableRequiredFields}
                                 scrollToRow={scrollToRow}
-                                setStatus={updateStatus} />}
+                                setStatus={updateStatus}
+                                mobileSortField={mobileSorting[0]?.id}
+                                mobileSortDesc={mobileSorting[0]?.desc} />}
                     bottom={!isMobile && !showFiltersPanel && showDetailsPanel
                         ? <MemoizedDetails torrentId={currentTorrent} updates={updates} />
                         : undefined}

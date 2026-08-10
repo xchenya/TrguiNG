@@ -53,6 +53,40 @@ import { MobileTorrentList } from "./torrentcard";
 const { TAURI, invoke, copyToClipboard } = await import(/* webpackChunkName: "taurishim" */"taurishim");
 import {RunStatus} from "../../status";
 
+export interface MobileSortField {
+    id: string,
+    label: string,
+    accessor: (t: Torrent) => number | string,
+}
+
+export const MobileSortFields: MobileSortField[] = [
+    { id: "name", label: "名称", accessor: (t) => t.name ?? "" },
+    { id: "totalSize", label: "大小", accessor: (t) => (t.totalSize ?? t.sizeWhenDone ?? 0) as number },
+    { id: "percentDone", label: "进度", accessor: (t) => (t.percentDone ?? 0) as number },
+    { id: "rateDownload", label: "下载速度", accessor: (t) => (t.rateDownload ?? 0) as number },
+    { id: "rateUpload", label: "上传速度", accessor: (t) => (t.rateUpload ?? 0) as number },
+    { id: "addedDate", label: "添加时间", accessor: (t) => (t.addedDate ?? 0) as number },
+    { id: "eta", label: "剩余时间", accessor: (t) => (t.eta ?? 0) as number },
+    { id: "uploadRatio", label: "分享率", accessor: (t) => (t.uploadRatio ?? 0) as number },
+    { id: "status", label: "状态", accessor: (t) => (t.status ?? 0) as number },
+    { id: "id", label: "ID", accessor: (t) => (t.id ?? 0) as number },
+];
+
+export function sortTorrents(torrents: Torrent[], sortField: string, desc: boolean): Torrent[] {
+    if (!sortField) return torrents;
+    const field = MobileSortFields.find((f) => f.id === sortField);
+    if (!field) return torrents;
+    const sorted = [...torrents].sort((a, b) => {
+        const aVal = field.accessor(a);
+        const bVal = field.accessor(b);
+        if (typeof aVal === "string" && typeof bVal === "string") {
+            return desc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+        }
+        return desc ? (bVal as number) - (aVal as number) : (aVal as number) - (bVal as number);
+    });
+    return sorted;
+}
+
 interface TableFieldProps {
     torrent: Torrent,
     fieldName: TorrentAllFieldsType,
@@ -440,6 +474,8 @@ export function TorrentTable(props: {
     onColumnVisibilityChange: React.Dispatch<TorrentFieldsType[]>,
     scrollToRow?: { id: string },
     setStatus: (status: RunStatus) => void,
+    mobileSortField?: string,
+    mobileSortDesc?: boolean,
 }) {
     const isMobile = useIsMobile();
     const config = useContext(ConfigContext);
@@ -483,6 +519,11 @@ export function TorrentTable(props: {
     const serverSelected = useServerSelectedTorrents();
     const selected = useMemo(() => Array.from(serverSelected).map(String), [serverSelected]);
 
+    const sortedTorrents = useMemo(() => {
+        if (!isMobile || !props.mobileSortField) return props.torrents;
+        return sortTorrents(props.torrents, props.mobileSortField, props.mobileSortDesc ?? false);
+    }, [isMobile, props.torrents, props.mobileSortField, props.mobileSortDesc]);
+
     const [info, setInfo, handler, openContextMenu] = useContextMenu();
     return (
         <Box w="100%" h="100%" onContextMenu={isMobile ? undefined : handler}>
@@ -495,7 +536,7 @@ export function TorrentTable(props: {
                 openTorrentDetails={props.openTorrentDetails}/>
             {isMobile
                 ? <MobileTorrentList
-                    torrents={props.torrents}
+                    torrents={sortedTorrents}
                     selected={serverSelected}
                     selectedReducer={props.selectedReducer}
                     setCurrentTorrent={props.setCurrentTorrent}
