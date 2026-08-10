@@ -459,7 +459,18 @@ function Details(props: DetailsProps) {
                     },
                 },
             }))}>
-            <Tabs.List px="sm" pt="xs" onContextMenu={handler}>
+            <Tabs.List px="sm" pt="xs" onContextMenu={handler}
+                style={{
+                    flexWrap: "nowrap",
+                    overflowX: "auto",
+                    WebkitOverflowScrolling: "touch",
+                    maxWidth: "100%",
+                    scrollbarWidth: "none",
+                    position: "relative",
+                    zIndex: 1,
+                }}
+                className="mobile-tabs-list"
+            >
                 <MemoSectionsContextMenu
                     sections={tabs} setSections={setTabs}
                     contextMenuInfo={info} setContextMenuInfo={setInfo} />

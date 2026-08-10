@@ -140,6 +140,10 @@ svg:not(:root) {
         height: 1.375rem !important;
         width: 1.375rem !important;
     }
+
+    .mobile-tabs-list::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .filters>* {
