@@ -12,6 +12,7 @@
     "webpack-serve": "webpack serve --config webpack.dev.js",
     "webpack-dev": "webpack --config webpack.dev.js",
     "webpack-prod": "webpack --config webpack.prod.js",
+    "build:preview": "webpack --config webpack.preview.js",
     "info": "tauri info",
     "react-devtools": "npx react-devtools"
   },

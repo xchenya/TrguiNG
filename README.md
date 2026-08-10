@@ -1,5 +1,15 @@
 
-## 基于 [xchenya/TrguiNG](https://github.com/xchenya/TrguiNG) 增加部分功能
+## 基于 [jayzcoder/TrguiNG](https://github.com/jayzcoder/TrguiNG) 改进增加部分功能
+
+> **项目说明**：本项目的移动端 H5 响应式适配、UI 交互重构及大部分前端代码修改由 AI 辅助 Agent（OpenCode）协作完成。
+
+### 更新 (240810a)
+1. add: 移动端 H5 响应式适配（双行状态栏、卡片式列表、底部批量操作栏）
+2. add: 移动端批量操作 Bottom Sheet 菜单（支持重新汇报、重新校验、变更目录、修改标签、优先级设置等）
+3. impr: 触控热区优化（Modal 与 Drawer 关闭按钮统一提升至 44x44px）
+4. impr: 默认隐藏种子卡片 Checkbox，支持显式进入/退出多选模式
+5. impr: 筛选抽屉选择后自动收起、去除 Drawer 标题及状态栏速度两端对齐
+6. info: 本次移动端适配大部分代码由 AI (OpenCode) 协作完成
 
 ### 更新 (260803a)
 1. add: 忽略错误功能（支持通配符过滤，可在参数设置>其他设置中配置）
