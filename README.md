@@ -3,6 +3,10 @@
 
 > **项目说明**：本项目的移动端 H5 响应式适配、UI 交互重构及大部分前端代码修改由 AI 辅助 Agent（OpenCode）协作完成。
 
+### 在线预览
+- [PC 版预览](https://xchenya.github.io/TrguiNG/)
+- [H5 移动端预览](https://xchenya.github.io/TrguiNG/?h5=true)
+
 ### 更新 (260810a)
 1. add: 移动端 H5 响应式适配（双行状态栏、卡片式列表、底部批量操作栏）
 2. add: 移动端批量操作 Bottom Sheet 菜单（支持重新汇报、重新校验、变更目录、修改标签、优先级设置等）
