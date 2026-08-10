@@ -342,7 +342,11 @@ export function AppSettingsModal(props: AppSettingsModalProps) {
         if (form.isValid()) {
             config.setServers(form.values.servers);
             config.values.app = { ...config.values.app, ...form.values.app };
-            config.values.interface = { ...config.values.interface, ...form.values.interface };
+            config.values.interface = {
+                ...config.values.interface,
+                ...form.values.interface,
+                ignoredErrors: form.values.interface.ignoredErrors.filter(s => s !== ""),
+            };
             props.onSave(form.values.servers);
             props.close();
         }

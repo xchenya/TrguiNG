@@ -7,6 +7,9 @@
 - [PC 版预览](https://xchenya.github.io/TrguiNG/)
 - [H5 移动端预览](https://xchenya.github.io/TrguiNG/?h5=true)
 
+### 更新 (260810c)
+1. **fix**: 修复忽略错误输入框无法使用回车键换行的问题
+
 ### 更新 (260810b)
 1. **fix**: 生产代码防御性增强，对详情面板及子组件补齐可选链 (`?.`) 与空值兜底 (`?? []`)，彻底解决缺失字段导致的渲染崩溃
 2. **impr**: 重构 Demo 模拟数据结构 (`baseTorrent`) 并部署 GitHub Pages 在线静态预览

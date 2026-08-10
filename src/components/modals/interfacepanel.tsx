@@ -195,7 +195,7 @@ export function InterfaceSettigsPanel<V extends InterfaceFormValues>(props: { fo
                     value={props.form.values.interface.ignoredErrors.join("\n")}
                     onChange={(e) => {
                         props.form.setFieldValue(
-                            "interface.ignoredErrors", e.currentTarget.value.split("\n").filter(s => s !== "") as any);
+                            "interface.ignoredErrors", e.currentTarget.value.split("\n") as any);
                     }} />
             </Grid.Col>
         </Grid>
