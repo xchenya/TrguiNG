@@ -144,6 +144,22 @@ svg:not(:root) {
     .mobile-tabs-list::-webkit-scrollbar {
         display: none;
     }
+
+    .mobile-modal.mantine-Modal-root {
+        padding-top: max(24px, env(safe-area-inset-top));
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-modal.mantine-Modal-root .mantine-Modal-inner {
+        width: calc(100% - 2rem);
+        max-width: 100%;
+    }
+
+    .mobile-modal.mantine-Modal-root .mantine-Modal-content {
+        max-height: calc(100vh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 .filters>* {

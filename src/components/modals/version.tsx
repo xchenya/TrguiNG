@@ -55,8 +55,17 @@ export function VersionModal({ opened, close }: ModalState) {
     }, [opened, frontend]);
 
     return (
-        <HkModal opened={opened} onClose={close} size="lg" centered p="lg">
-            <Box sx={{ maxHeight: isMobile ? "80vh" : undefined, overflowY: isMobile ? "auto" : undefined }}>
+        <HkModal opened={opened} onClose={close} size="lg" centered padding="lg"
+            fullScreen={false}
+            className={isMobile ? "mobile-modal" : undefined}
+            sx={isMobile ? {
+                width: "calc(100vw - 2rem)",
+                maxWidth: "calc(100vw - 2rem)",
+                marginTop: "max(24px, env(safe-area-inset-top))",
+                marginBottom: "env(safe-area-inset-bottom)",
+            } : undefined}
+        >
+            <Box sx={{ maxHeight: isMobile ? "calc(80vh - 80px)" : undefined, overflowY: isMobile ? "auto" : undefined }}>
                 <Title order={2} mb="lg">TrguiNG - 中文版</Title>
                 <Text>
                     <Anchor href="https://transmissionbt.com/" target="_blank" rel="noreferrer">Transmission</Anchor> WebUI
