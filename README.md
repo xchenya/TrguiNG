@@ -7,31 +7,15 @@
 - [PC 版预览](https://xchenya.github.io/TrguiNG/)
 - [H5 移动端预览](https://xchenya.github.io/TrguiNG/?h5=true)
 
-### 更新 (260810d)
-1. **feat**: 移动端排序菜单（Sort Bottom Sheet），支持 10 个排序字段（名称、大小、进度、速度、时间等）+ 升序/降序切换
-2. **fix**: 详情 Tabs 标签栏移动端横向滚动，防止换行被内容遮挡
-3. **fix**: 关于 Modal 修复视口错位（safe-area 避让地址栏 + 居中定位 + CSS 层叠修复）
-4. **impr**: 关于 Modal 底部新增【关闭】大按钮，内容区可滚动
-5. **impr**: 底部状态栏选中文本弹性收缩 + 省略号截断 + 文案精简（`已选 X (完成/剩余)`）
-
-### 更新 (260810c)
-1. **fix**: 修复忽略错误输入框无法使用回车键换行的问题
-
-### 更新 (260810b)
+### 更新 (v260810c)
 1. **add**: 移动端 H5 响应式适配（双行状态栏、卡片式列表、底部固定操作栏、批量操作 Bottom Sheet 菜单）
-2. **fix**: 生产代码防御性增强，对详情面板及子组件补齐可选链 (`?.`) 与空值兜底 (`?? []`)，彻底解决缺失字段导致的渲染崩溃
-3. **impr**: 触控热区优化（Modal 与 Drawer 关闭按钮统一提升至 44x44px 触控区）
-4. **impr**: 默认隐藏种子卡片 Checkbox，支持显式进入/退出多选模式；筛选抽屉选中后自动收起
-5. **impr**: 重构 Demo 模拟数据结构 (`baseTorrent`) 并部署 GitHub Pages 在线静态预览
-6. **info**: 本次移动端 H5 响应式适配大部分代码由 AI (OpenCode / LLM) 协作完成
-
-### 更新 (260810a)
-1. add: 移动端 H5 响应式适配（双行状态栏、卡片式列表、底部批量操作栏）
-2. add: 移动端批量操作 Bottom Sheet 菜单（支持重新汇报、重新校验、变更目录、修改标签、优先级设置等）
-3. impr: 触控热区优化（Modal 与 Drawer 关闭按钮统一提升至 44x44px）
-4. impr: 默认隐藏种子卡片 Checkbox，支持显式进入/退出多选模式
-5. impr: 筛选抽屉选择后自动收起、去除 Drawer 标题及状态栏速度两端对齐
-6. info: 本次移动端适配大部分代码由 AI (OpenCode) 协作完成
+2. **feat**: 移动端排序菜单（Sort Bottom Sheet），支持 10 个排序字段（名称、大小、进度、速度、时间等）+ 升序/降序切换
+3. **fix**: 生产代码防御性增强，对详情面板及子组件补齐 Optional Chaining (`?.`) 与空值兜底 (`?? []`)，彻底解决缺失字段导致的渲染崩溃
+4. **fix**: 修复忽略错误输入框无法使用回车键换行的问题
+5. **fix**: 详情 Tabs 标签栏移动端横向滚动，防止换行被内容遮挡；关于 Modal 修复视口错位（safe-area 避让地址栏 + 居中定位 + 新增【关闭】大按钮）
+6. **impr**: 触控热区优化（Modal 与 Drawer 关闭按钮统一提升至 44x44px 触控区）；默认隐藏种子卡片 Checkbox，支持显式进入/退出多选模式；筛选抽屉选中后自动收起
+7. **impr**: 底部状态栏选中文本弹性收缩 + 省略号截断 + 文案精简（已选 X (完成/剩余)）；重构 Demo 模拟数据结构并部署 GitHub Pages 在线静态预览
+8. **info**: 本次移动端 H5 响应式适配大部分代码由 AI (OpenCode / LLM) 协作完成
 
 ### 更新 (260803a)
 1. add: 忽略错误功能（支持通配符过滤，可在参数设置>其他设置中配置）
@@ -76,7 +60,7 @@
 ## PS. 主要是自用，有想加功能的可以提 issues，不保证实现
 
 ## 安装介绍（docker 环境）
-1. 从 [releases](https://github.com/xchenya/TrguiNG/releases) 下载 `trguing-web-xxxx-zh.zip`
+1. 从 [releases](https://github.com/xchenya/TrguiNG/releases) 下载 `trguing-web-v260810c-zh.zip`
 2. 解压到 transmission 设置的 webui 目录即可
 3. transmission 需要正确映射并设置环境变量(确保 index.html 位于 TRANSMISSION_WEB_HOME 所在的目录第一层):
    ```
