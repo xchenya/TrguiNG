@@ -83,7 +83,7 @@ export function TrackersTable(props: { torrent: Torrent }) {
     return <TrguiTable<TrackerStats> {...{
         tablename: "trackers",
         columns: Columns,
-        data: props.torrent.trackerStats,
+        data: props.torrent.trackerStats ?? [],
         selected,
         getRowId,
         selectedReducer,

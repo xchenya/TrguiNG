@@ -134,7 +134,10 @@ export class CachedFileTree {
     parse(torrent: TorrentBase, fromFile: boolean) {
         this.torrenthash = torrent.hashString;
 
-        this.files = torrent.files.map((entry: any, index: number): FileEntry => {
+        const files = torrent.files ?? [];
+        const fileStats = torrent.fileStats ?? [];
+
+        this.files = files.map((entry: any, index: number): FileEntry => {
             const path = (entry.name as string).replace(/\\/g, "/");
 
             return {
@@ -143,10 +146,10 @@ export class CachedFileTree {
                 level: 0,
                 fullpath: path,
                 size: entry.length as number,
-                want: fromFile ? true : torrent.fileStats[index].wanted as boolean,
-                done: fromFile ? 0 : torrent.fileStats[index].bytesCompleted,
-                percent: fromFile ? 0 : torrent.fileStats[index].bytesCompleted * 100 / entry.length,
-                priority: fromFile ? 0 : torrent.fileStats[index].priority,
+                want: fromFile ? true : (fileStats[index]?.wanted ?? true),
+                done: fromFile ? 0 : (fileStats[index]?.bytesCompleted ?? 0),
+                percent: fromFile ? 0 : ((fileStats[index]?.bytesCompleted ?? 0) * 100 / (entry.length || 1)),
+                priority: fromFile ? 0 : (fileStats[index]?.priority ?? 0),
                 isSelected: false,
                 wantedUpdating: false,
             };

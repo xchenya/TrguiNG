@@ -111,8 +111,8 @@ function SpeedLimit(props: { torrent: Torrent, field: "download" | "upload" }) {
 }
 
 function Seeds(props: { torrent: Torrent }) {
-    const sending = props.torrent.peersSendingToUs as number;
-    const totalSeeds = props.torrent.cachedSeedsTotal;
+    const sending = (props.torrent.peersSendingToUs as number) ?? 0;
+    const totalSeeds = props.torrent.cachedSeedsTotal ?? -1;
     if (totalSeeds < 0) {
         return <>{sending}</>;
     } else {
@@ -121,8 +121,8 @@ function Seeds(props: { torrent: Torrent }) {
 }
 
 function Peers(props: { torrent: Torrent }) {
-    const getting = props.torrent.peersGettingFromUs as number;
-    const totalPeers = props.torrent.cachedPeersTotal;
+    const getting = (props.torrent.peersGettingFromUs as number) ?? 0;
+    const totalPeers = props.torrent.cachedPeersTotal ?? -1;
     if (totalPeers < 0) {
         return <>{getting}</>;
     } else {
@@ -131,7 +131,7 @@ function Peers(props: { torrent: Torrent }) {
 }
 
 function TrackerUpdate(props: { torrent: Torrent }) {
-    if (props.torrent.trackerStats.length === 0) return <></>;
+    if (!props.torrent.trackerStats || props.torrent.trackerStats.length === 0) return <></>;
     const tracker = props.torrent.trackerStats[0] as TrackerStats;
     const state = tracker.announceState;
     return <>{(state === 2 || state === 3) ? "-" : timestampToDateString(tracker.nextAnnounceTime)}</>;
@@ -474,14 +474,14 @@ function Details(props: DetailsProps) {
                     <Tabs.Tab value="文件" disabled={torrent === undefined} style={{ order: tabsMap["文件"] }}>
                         <Group>
                             <Icon.Files size="1.1rem" />
-                            {`文件${torrent !== undefined ? ` (${torrent.files.length as number})` : ""}`}
+                            {`文件${torrent !== undefined && torrent.files ? ` (${torrent.files.length as number})` : ""}`}
                         </Group>
                     </Tabs.Tab>}
                 {tabs[tabsMap["块"]].visible &&
                     <Tabs.Tab value="块" disabled={torrent === undefined} style={{ order: tabsMap["块"] }}>
                         <Group>
                             <Icon.Grid3x2 size="1.1rem" />
-                            {`块${torrent !== undefined ? ` (${torrent.pieceCount as number})` : ""}`}
+                            {`块${torrent !== undefined ? ` (${(torrent.pieceCount as number) ?? 0})` : ""}`}
                         </Group>
                     </Tabs.Tab>}
                 {tabs[tabsMap["用户"]].visible &&

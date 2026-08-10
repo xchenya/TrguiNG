@@ -33,11 +33,11 @@ export function PiecesCanvas(props: { torrent: Torrent }) {
     const gridRef = useRef<HTMLCanvasElement>(null);
 
     const wantedPieces = useMemo(() => {
-        const result = new Array<boolean>(props.torrent.pieceCount);
+        const result = new Array<boolean>(props.torrent.pieceCount ?? 0);
 
-        const pieceSize = props.torrent.pieceSize;
-        const lengths = props.torrent.files.map((f: any) => f.length);
-        const wanted = props.torrent.fileStats.map((f: any) => f.wanted);
+        const pieceSize = props.torrent.pieceSize ?? 262144;
+        const lengths = (props.torrent.files ?? []).map((f: any) => f.length ?? 0);
+        const wanted = (props.torrent.fileStats ?? []).map((f: any) => f.wanted ?? true);
 
         let fileIndex = 0;
         let pieceIndex = 0;
@@ -62,7 +62,7 @@ export function PiecesCanvas(props: { torrent: Torrent }) {
 
         const canvasWidth = Math.floor(toDevicePixels(cssWidth));
         const canvasHeight = Math.floor(toDevicePixels(cssHeight));
-        const pieceCount = props.torrent.pieceCount;
+        const pieceCount = props.torrent.pieceCount ?? 0;
         const maxPieceSize = toDevicePixels(20);
         const minColumns = Math.ceil(canvasWidth / maxPieceSize);
 
@@ -88,6 +88,7 @@ export function PiecesCanvas(props: { torrent: Torrent }) {
     }, [props.torrent.pieceCount, cssWidth, cssHeight]);
 
     const pieces = useMemo(() => {
+        if (!props.torrent.pieces) return new Uint8Array(0);
         const bstr = window.atob(props.torrent.pieces);
         const bytes = new Uint8Array(bstr.length);
         for (let i = 0; i < bstr.length; i++) {
@@ -100,7 +101,7 @@ export function PiecesCanvas(props: { torrent: Torrent }) {
         const canvas = gridRef.current as HTMLCanvasElement;
         const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const remainder = rows * cols - props.torrent.pieceCount;
+        const remainder = rows * cols - (props.torrent.pieceCount ?? 0);
 
         ctx.beginPath();
         ctx.lineWidth = toDevicePixels(pieceSize > toDevicePixels(5) ? 1 : 0.5);

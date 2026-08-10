@@ -114,7 +114,7 @@ export function PeersTable(props: { torrent: Torrent }) {
     return <TrguiTable<PeerStats> {...{
         tablename: "peers",
         columns: Columns,
-        data: props.torrent.peers,
+        data: props.torrent.peers ?? [],
         selected,
         getRowId,
         selectedReducer,

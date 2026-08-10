@@ -38,7 +38,7 @@ function getTorrentError(t: TorrentBase): string {
     let trackerError = "";
     let noTrackerError = false;
 
-    for (const trackerStat of t.trackerStats) {
+    for (const trackerStat of (t.trackerStats ?? [])) {
         let err = "";
         if (trackerStat.hasAnnounced as boolean && !(trackerStat.lastAnnounceSucceeded as boolean)) {
             err = trackerStat.lastAnnounceResult as string;
@@ -98,7 +98,7 @@ const portRe = /:\d+$/;
 const prefixRe = /^((t|tr|tk|tracker|bt|open|opentracker)\d*)\.[^.]+\.[^.]+$/;
 
 function getTorrentMainTracker(t: TorrentBase): string {
-    if (t.trackerStats.length === 0) return "<No trackers>";
+    if (!t.trackerStats || t.trackerStats.length === 0) return "<No trackers>";
     let host = t.trackerStats[0].host as string;
     const portMatch = portRe.exec(host);
     if (portMatch != null) host = host.substring(0, portMatch.index);
@@ -108,15 +108,15 @@ function getTorrentMainTracker(t: TorrentBase): string {
 }
 
 function getSeedsTotal(t: TorrentBase) {
-    let seeds = t.trackerStats.length > 0 ? 0 : -1;
-    t.trackerStats.forEach(
+    let seeds = (t.trackerStats?.length ?? 0) > 0 ? 0 : -1;
+    (t.trackerStats ?? []).forEach(
         (tracker: TrackerStats) => { seeds = Math.max(seeds, tracker.seederCount as number); });
     return seeds;
 }
 
 function getPeersTotal(t: TorrentBase) {
-    let peers = t.trackerStats.length > 0 ? 0 : -1;
-    t.trackerStats.forEach(
+    let peers = (t.trackerStats?.length ?? 0) > 0 ? 0 : -1;
+    (t.trackerStats ?? []).forEach(
         (tracker: TrackerStats) => { peers = Math.max(peers, tracker.leecherCount as number); });
     return peers;
 }
