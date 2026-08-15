@@ -7,6 +7,14 @@
 - [PC 版预览](https://xchenya.github.io/TrguiNG/)
 - [H5 移动端预览](https://xchenya.github.io/TrguiNG/?h5=true)
 
+### 更新 (v260815a)
+1. **add**: 内置 GeoIP 数据库 (`dbip.mmdb.gz`)，IP 归属地查询无需额外配置即可使用
+2. **fix**: 修复 IP 归属地查询导致的详情页加载转圈问题（GeoIP 引擎异常重试机制 + 空值兜底）
+3. **fix**: 修复 `dbip.mmdb.gz` 构建时未打包的问题（本地构建需提前下载至 `src-tauri/`）
+4. **info**: 发布两个版本
+   - `trguing-web-v260815a-zh.zip`（完整版，含 `dbip.mmdb.gz`，开箱即用）
+   - `trguing-web-v260815a-zh-lite.zip`（精简版，不含 `dbip.mmdb.gz`，用户可自行决定是否添加）
+
 ### 更新 (v260810c)
 1. **add**: 移动端 H5 响应式适配（双行状态栏、卡片式列表、底部固定操作栏、批量操作 Bottom Sheet 菜单）
 2. **feat**: 移动端排序菜单（Sort Bottom Sheet），支持 10 个排序字段（名称、大小、进度、速度、时间等）+ 升序/降序切换
@@ -60,7 +68,9 @@
 ## PS. 主要是自用，有想加功能的可以提 issues，不保证实现
 
 ## 安装介绍（docker 环境）
-1. 从 [releases](https://github.com/xchenya/TrguiNG/releases) 下载 `trguing-web-v260810c-zh.zip`
+1. 从 [releases](https://github.com/xchenya/TrguiNG/releases) 下载
+   - `trguing-web-v260815a-zh.zip`（完整版，含 IP 归属地数据库）或
+   - `trguing-web-v260815a-zh-lite.zip`（精简版，不含 IP 归属地数据库，用户自行决定是否添加）
 2. 解压到 transmission 设置的 webui 目录即可
 3. transmission 需要正确映射并设置环境变量(确保 index.html 位于 TRANSMISSION_WEB_HOME 所在的目录第一层):
    ```
