@@ -10,21 +10,43 @@ export interface IpLookupResult {
 
 let readerPromise: Promise<Reader<CountryResponse>> | undefined;
 
-async function getReader() {
-    readerPromise ??= fetch("dbip.mmdb.gz")
-        .then(async (response) => {
-            if (!response.ok) {
-                throw new Error(`GeoIP database returned error: ${response.status} (${response.statusText})`);
-            }
-            if (response.body === null) throw new Error("GeoIP database response has no body");
-            const decompressed = response.body.pipeThrough(new DecompressionStream("gzip"));
-            return new Reader<CountryResponse>(Buffer.from(await new Response(decompressed).arrayBuffer()));
-        });
-    return await readerPromise;
+async function getReader(): Promise<Reader<CountryResponse> | null> {
+    if (readerPromise !== undefined) {
+        try {
+            return await readerPromise;
+        } catch {
+            readerPromise = undefined;
+            return null;
+        }
+    }
+    const fetchPromise = Promise.race([
+        fetch("dbip.mmdb.gz")
+            .then(async (response) => {
+                if (!response.ok) {
+                    throw new Error(`GeoIP database returned error: ${response.status} (${response.statusText})`);
+                }
+                if (response.body === null) throw new Error("GeoIP database response has no body");
+                const decompressed = response.body.pipeThrough(new DecompressionStream("gzip"));
+                return new Reader<CountryResponse>(Buffer.from(await new Response(decompressed).arrayBuffer()));
+            }),
+        new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error("GeoIP database fetch timeout")), 10000);
+        }),
+    ]);
+    readerPromise = fetchPromise;
+    try {
+        return await fetchPromise;
+    } catch {
+        readerPromise = undefined;
+        return null;
+    }
 }
 
 export async function lookupIps(ips: string[]): Promise<IpLookupResult[]> {
     const reader = await getReader();
+    if (reader === null) {
+        return ips.map((ip) => ({ ip }));
+    }
     return ips.map((ip) => {
         const country = reader.get(ip)?.country;
         return {
