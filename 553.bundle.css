@@ -1,0 +1,553 @@
+/**
+ * TrguiNG - next gen remote GUI for transmission torrent daemon
+ * Copyright (C) 2023  qu1ck (mail at qu1ck.org)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-size: 0.9em;
+}
+
+:root {
+    --mobile-statusbar-height: 4.5rem;
+}
+
+svg,
+img {
+    vertical-align: middle;
+}
+
+svg:not(:root) {
+    overflow: visible;
+}
+
+.icon-container {
+    flex-shrink: 0;
+    display: contents;
+}
+
+.split-horizontal {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.split-vertical {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.gutter {
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==);
+    cursor: col-resize;
+}
+
+.gutter.gutter-vertical {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=);
+    cursor: row-resize;
+}
+
+.scrollable {
+    position: relative;
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+
+.scrollable>* {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+}
+
+.statusbar>* {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .mobile-statusbar {
+        height: var(--mobile-statusbar-height);
+        width: 100%;
+    }
+
+    .mobile-statusbar > .mobile-statusbar-row {
+        flex: 1 1 50%;
+        min-height: 0;
+        overflow: visible;
+        width: 100%;
+    }
+
+    .mobile-statusbar-speed {
+        flex: 0 1 auto;
+        min-width: 0;
+        padding-inline: 0.25rem;
+    }
+
+    .mobile-statusbar-speed > span:last-child,
+    .mobile-statusbar-selection {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mobile-statusbar-selection {
+        flex: 1 1 auto;
+        padding-inline: 0.25rem;
+    }
+
+    .mobile-statusbar-tools {
+        flex-shrink: 0;
+    }
+
+    .mobile-modal .mantine-CloseButton-root,
+    .mantine-Drawer-root .mantine-CloseButton-root,
+    .mantine-Modal-root .mantine-CloseButton-root {
+        height: 44px;
+        min-height: 44px;
+        min-width: 44px;
+        width: 44px;
+    }
+
+    .mobile-modal .mantine-CloseButton-root svg,
+    .mantine-Drawer-root .mantine-CloseButton-root svg,
+    .mantine-Modal-root .mantine-CloseButton-root svg {
+        height: 1.375rem !important;
+        width: 1.375rem !important;
+    }
+
+    .mobile-tabs-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-modal.mantine-Modal-root {
+        padding-top: max(24px, env(safe-area-inset-top));
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-modal.mantine-Modal-root .mantine-Modal-inner {
+        width: calc(100% - 2rem);
+        max-width: 100%;
+    }
+
+    .mobile-modal.mantine-Modal-root .mantine-Modal-content {
+        max-height: calc(100vh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+.filters>* {
+    border-width: 0px 0px 1px 0px;
+    border-style: solid;
+    border-color: #999;
+    cursor: pointer;
+}
+
+.selected {
+    background-color: rgb(50, 80, 170);
+    color: white;
+}
+
+.list-delete-icon {
+    height: initial;
+    width: initial;
+    min-height: initial;
+    min-width: initial;
+    display: none;
+}
+
+button[data-hovered="true"] .list-delete-icon {
+    display: block;
+}
+
+.progressbar {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progressbar>:first-child {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: #217de0;
+    color: white;
+}
+
+.progressbar.red>:first-child {
+    background: #fa5252;
+}
+
+.progressbar.green>:first-child {
+    background: #37b24d;
+}
+
+.progressbar.dark-green>:first-child {
+    background: #0f6d20;
+}
+
+.progressbar.grey>:first-child {
+    background: #677274;
+}
+
+.progressbar>:last-child {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: white;
+    color: black;
+    /* clip-path: inset(0 0 0 50%); */
+    /* -webkit-clip-path: inset(0 0 0 50%); */
+    transition: clip-path 0.5s ease;
+}
+
+.progressbar.animate>:first-child {
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+    animation: 1s steps(20) infinite barberpole;
+}
+
+@keyframes barberpole {
+    0% {
+        background-position-x: 1rem;
+    }
+}
+
+/**
+ * TrguiNG - next gen remote GUI for transmission torrent daemon
+ * Copyright (C) 2023  qu1ck (mail at qu1ck.org)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.torrent-table-container .th, .torrent-table-container .td {
+    padding: 0.05em 0.2em;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+}
+
+.torrent-table-container .th {
+    cursor: pointer;
+}
+
+.torrent-table-container .td {
+    cursor: default;
+}
+
+.torrent-table-container .th div, .torrent-table-container .td div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.torrent-label {
+    margin-inline: 0.1em;
+}
+
+.white-outline {
+    box-shadow: 0 0 2px 0 white;
+}
+
+.torrent-table-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.torrent-table-rows {
+    flex-grow: 1;
+    position: relative;
+    overflow: auto;
+}
+
+.torrent-table-rows:focus {
+    outline: 0;
+}
+
+.torrent-table {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.torrent-table-container .tr {
+    display: flex;
+    flex-shrink: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.torrent-table-container .tr.touch-context-row {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.mobile-torrent-list {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 0.65rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.torrent-card {
+    height: calc(100% - 0.5rem);
+    padding: 0.75rem 0.8rem;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.torrent-card-header.selection-mode {
+    animation: torrent-card-header-enter-selection 150ms ease-out;
+}
+
+.torrent-card-header.browse-mode {
+    animation: torrent-card-header-enter-browse 150ms ease-out;
+}
+
+.torrent-card-checkbox {
+    animation: torrent-card-checkbox-enter 150ms ease-out;
+    transform-origin: left center;
+}
+
+.mobile-browse-header,
+.mobile-selection-header {
+    animation: mobile-toolbar-mode-enter 150ms ease-out;
+}
+
+@keyframes torrent-card-checkbox-enter {
+    from {
+        opacity: 0;
+        transform: translateX(-0.4rem) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes torrent-card-header-enter-selection {
+    from {
+        opacity: 0.85;
+        transform: translateX(-0.4rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes torrent-card-header-enter-browse {
+    from {
+        opacity: 0.85;
+        transform: translateX(1.8rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes mobile-toolbar-mode-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-0.2rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .torrent-card-header,
+    .torrent-card-checkbox,
+    .mobile-browse-header,
+    .mobile-selection-header {
+        animation: none;
+    }
+}
+
+.torrent-card .progressbar {
+    height: 1rem;
+}
+
+.mobile-filters-drawer .mantine-Drawer-body {
+    padding-inline: 0.5rem;
+}
+
+.mobile-filters-drawer .mantine-Drawer-body [tabindex="-1"] {
+    min-height: 2.75rem;
+    border-radius: 0.5rem;
+    margin-block: 0.15rem;
+}
+
+.mobile-filters-drawer .mantine-Drawer-body [tabindex="-1"].selected {
+    background: rgba(34, 139, 230, 0.16);
+}
+
+.mobile-details-drawer .mantine-Drawer-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-details-drawer .mantine-Drawer-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.mobile-details-body {
+    flex: 1;
+    min-height: 0;
+}
+
+.mobile-batch-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    flex: 1;
+    touch-action: manipulation;
+}
+
+.mobile-batch-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.mobile-batch-actions-drawer .mantine-Drawer-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-bottom: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-batch-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.mobile-batch-item-btn:hover {
+    background-color: rgba(133, 133, 133, 0.12);
+}
+
+.mobile-batch-item-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.torrent-table .tr:nth-child(odd) {
+    box-shadow: inset 0 0 0 9999px rgba(133, 133, 133, 0.1);
+}
+
+.torrent-table .tr.descendant-selected {
+    background-color: rgb(50, 80, 170);
+    color: white;
+    box-shadow: inset 0 0 0 9999px rgba(133, 133, 133, 0.7);
+}
+
+.torrent-table .tr.descendant-selected:nth-child(odd) {
+    box-shadow: inset 0 0 0 9999px rgba(133, 133, 133, 0.8);
+}
+
+.resizer {
+    display: block;
+    background: rgba(124, 124, 124, 0.4);
+    cursor: col-resize;
+    height: 100%;
+    /* prevents from scrolling while dragging on touch devices */
+    touch-action: none;
+    opacity: 0.3;
+    width: 2px;
+    overflow: visible !important;
+}
+
+.resizer.isResizing {
+    background: rgba(122, 122, 122, 0.8);
+    opacity: 1;
+}
+
+.th:hover>.resizer {
+    opacity: 1;
+    width: 0.3em;
+}
+
+.resizer-guide {
+    border-right: 1px grey dashed;
+    width: 100%;
+    height: 10000px;
+}
+
